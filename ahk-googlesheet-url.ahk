@@ -106,16 +106,13 @@ getDataFromGoogleSheet(urlData){
           
        Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
        {
-         msgbox %A_LoopField% 
+         msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
          msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
        }
 
          /*
             COLUNAS DA PLANILHA
          */
-         ; If(RegExMatch(LineContent, "Nome") != 0)
-         ;    msgbox % "coluna numero" LineNumber
-
           Coluna1 := RegExReplace(StrSplit(A_LoopField,",")[1], aspa , "") ; 1ª coluna da planilha
          ;  msgbox %Coluna1%
           Coluna2 := RegExReplace(StrSplit(A_LoopField,",")[2], aspa , "") ; 2ª coluna da planilha
@@ -138,8 +135,8 @@ getDataFromGoogleSheet(urlData){
                ;  msgbox % index " is " NomeDocumentacao 
                 URLDocTratada := RegExReplace(NomeDocumentacao, "%idiomapt%", "")
                ;  msgbox % URLDocTratada
-             if(NomeDocumentacao != "URL")
-                Run % URLDocTratada
+            ;  if(NomeDocumentacao != "URL")
+            ;     Run % URLDocTratada
           }
           /*
             !ORGANIZAR O CONTEÚDO DA PLANILHA POR CATEGORIA, SEPARAR CADA NOME NA SUA DEVIDA COMBOBOX/LISTBOX
