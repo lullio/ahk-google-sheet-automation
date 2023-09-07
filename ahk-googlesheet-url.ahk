@@ -72,14 +72,11 @@ Gui, Show,, Abrir Curso e Controlar Video - Felipe Lulio
 Return
 ; GoSub, controlVideos
 ; Ignorar o erro que o ahk dá e continuar executando o script
-ComObjError(false)
+aspa =
+(
+"
+)
 getDataFromGoogleSheet(urlData){
-   aspa =
-   (
-   "
-   )
-   ; https://stackoverflow.com/questions/33713084/download-link-for-google-spreadsheets-csv-export-with-multiple-sheets
-   ; https://www.autohotkey.com/docs/v1/lib/URLDownloadToFile.htm
    whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
    whr.Open("GET",urlData, true)
    whr.Send()
@@ -87,20 +84,11 @@ getDataFromGoogleSheet(urlData){
    whr.WaitForResponse()
    googleSheetData := whr.ResponseText
    SemAspa := RegExReplace(googleSheetData, aspa , "")
-   ;  msgbox %googleSheetData%
    ; Return SubStr(googleSheetData, 2,-1) ; remove o primeiro e último catactere (as aspas)
    Return googleSheetData
 }
 
  getData:
-    aspa =
-    (
-    "
-    )
-    /*
-       IMPORTANTE:
-       A COLUNA E DA PLANILHA PRECISA TER UMA FÓRMULA PARA GERAR O ARRAY DOS DADOS
-    */
     Gui Submit, NoHide
           ; query para selecionar apenas a primeira coluna
           urlDataQueryGA4 := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/gviz/tq?tqx=out:csv&range=A:D&sheet=All-Docs&tq=select%20*%20where%20D%20matches%20'%5EGA4.*'%20AND%20D%20is%20not%20null"
@@ -110,19 +98,21 @@ getDataFromGoogleSheet(urlData){
  
     ;! CAPTURAR TODAS LINHAS E COLUNAS DA PLANILHA
     dataAllRows := getDataFromGoogleSheet(urlDataQueryGA4)
-    msgbox % dataAllRows
-    Loop, parse, dataAllRows, `n ; QUEBRA DE LINHA, PARA EXIBIR TODAS AS ROWS
+   ;  msgbox % dataAllRows
+    Loop, parse, dataAllRows, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
        {
           LineNumber := A_Index ; Index da linha
           LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
-          msgbox % "header" LineContent
+          
+       Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
+            msgbox %A_LoopField%
+
          /*
             COLUNAS DA PLANILHA
          */
-         If(RegExMatch(LineContent, "Nome") != 0)
-            msgbox % "coluna numero" LineNumber
-         msgbox %LineNumber%
-         msgbox %LineContent%
+         ; If(RegExMatch(LineContent, "Nome") != 0)
+         ;    msgbox % "coluna numero" LineNumber
+
           Coluna1 := RegExReplace(StrSplit(A_LoopField,",")[1], aspa , "") ; 1ª coluna da planilha
          ;  msgbox %Coluna1%
           Coluna2 := RegExReplace(StrSplit(A_LoopField,",")[2], aspa , "") ; 2ª coluna da planilha
