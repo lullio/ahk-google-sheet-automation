@@ -105,7 +105,10 @@ getDataFromGoogleSheet(urlData){
           LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
           
        Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
-            msgbox %A_LoopField%
+       {
+         msgbox %A_LoopField% 
+         msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
+       }
 
          /*
             COLUNAS DA PLANILHA
