@@ -98,7 +98,7 @@ getDataFromGoogleSheet(urlData){
  
     ;! CAPTURAR TODAS LINHAS E COLUNAS DA PLANILHA
     dataAllRows := getDataFromGoogleSheet(urlDataQueryGA4)
-   ;  msgbox % dataAllRows
+    msgbox % dataAllRows
     Loop, parse, dataAllRows, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
        {
           LineNumber := A_Index ; Index da linha
@@ -106,9 +106,25 @@ getDataFromGoogleSheet(urlData){
           
        Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
        {
-         msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
-         msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
+         ColumnNumber := A_Index ; Index da linha
+         cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
+         ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
+         ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
+         if(InStr(cellContent, "Nome")) ; se for a 1ª linha header e texto for igual a "nome"
+         {
+            Loop, parse, dataAllRows, `n
+               {
+               msgbox % StrSplit(A_LoopField,",")[ColumnNumber]
+               row.push(a_loopfield)
+               ifequal,a_index,13,break ;prevents from reading columns that are further out se chegar na linha 13 quebrar
+               }
+            ColunaNome := RegExReplace([1], aspa , "") ; 1ª coluna da planilha
+            ; msgbox "coluna nome " %A_LoopField%
+         }
+         ; msgbox % StrSplit(LineContent,",")[LineNumber]
        }
+      ;  If(StrSplit(A_LoopField,",")[A_Index]){
+      ;  }
 
          /*
             COLUNAS DA PLANILHA
