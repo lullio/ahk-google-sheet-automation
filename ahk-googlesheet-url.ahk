@@ -101,6 +101,7 @@ getDataFromGoogleSheet(urlData){
     dataAllRows := getDataFromGoogleSheet(urlDataQueryGA4)
     msgbox % dataAllRows
     rowsNome := []
+    teste := ""
     Loop, parse, dataAllRows, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
        {
           LineNumber := A_Index ; Index da linha
@@ -123,6 +124,7 @@ getDataFromGoogleSheet(urlData){
                ; msgbox %A_LoopField% ; aqui exibe a linha inteira
                ; msgbox % columnData := StrSplit(A_LoopField,",")[ColumnNumber] ; Somente o valor da celula da coluna
                rowsNome.push(StrSplit(A_LoopField,",")[ColumnNumber]) ; Somente o valor da celula da coluna
+               test.= StrSplit(A_LoopField,",")[ColumnNumber] ", "
                ; ifequal,a_index,13,break ;prevents from reading columns that are further out se chegar na linha 13 quebrar
                ; ColunaNome := RegExReplace([1], aspa , "") ; 1ª coluna da planilha
                }
@@ -188,6 +190,8 @@ getDataFromGoogleSheet(urlData){
  
        } 
        msgbox % rowsNome[2]
+       msgbox % "let arr = " RegExReplace(test, ",\s+$", ";")
+       Clipboard := "let arr = " RegExReplace(test, " ?,\s+$", ";")
        ; MODIFICANDO TODAS COMBOBOX PARA POPULAREM OS DADOS DA PLANILHA
        GuiControl,1:, Curso, %ListTopCourses% ; main courses
        GuiControl,1:, CursoWebDev, %ListWebDevCourses% ; web dev courses
