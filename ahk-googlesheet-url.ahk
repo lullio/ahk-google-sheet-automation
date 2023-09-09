@@ -139,13 +139,13 @@ GS_GetCSV(sheetURL_key:="1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34", sheetURL
    Return googleSheetData
 }
 
-GS_GetCSV_Data(JS_VariableName := "arr"){
+GS_GetCSV_Data(JS_VariableName:="arr"){
     Gui Submit, NoHide
-    
     sheetData_All := GS_GetCSV()
     sheetData_ColumnDataArr := []
     sheetData_ColumnDataStr := ""
     
+
     Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
        {
           LineNumber := A_Index ; Index da linha
@@ -232,7 +232,7 @@ GS_GetCSV_Data(JS_VariableName := "arr"){
        VARIÁVEL QUE FINALIZA A CONVERSÃO PARA UMA VARIÁVEL JAVASCRIPT
        - troca a última vírgula por ]; para finalizar a variável do tipo array
       */
-       sheetData_ColumnDataStrJS = % "let " JS_VariableName = "[" RegExReplace(sheetData_ColumnDataStr, ",\s+$", "];")
+       sheetData_ColumnDataStrJS = % "let " JS_VariableName " = [" RegExReplace(sheetData_ColumnDataStr, ",\s+$", "];")
 
        msgbox % sheetData_ColumnDataStrJS
        ; MODIFICANDO TODAS COMBOBOX PARA POPULAREM OS DADOS DA PLANILHA
