@@ -76,6 +76,7 @@ aspa =
 (
 "
 )
+
 getDataFromGoogleSheet(urlData){
    whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
    whr.Open("GET",urlData, true)
@@ -99,6 +100,7 @@ getDataFromGoogleSheet(urlData){
     ;! CAPTURAR TODAS LINHAS E COLUNAS DA PLANILHA
     dataAllRows := getDataFromGoogleSheet(urlDataQueryGA4)
     msgbox % dataAllRows
+    rowsNome := []
     Loop, parse, dataAllRows, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
        {
           LineNumber := A_Index ; Index da linha
@@ -112,17 +114,23 @@ getDataFromGoogleSheet(urlData){
          ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
          if(InStr(cellContent, "Nome")) ; se for a 1ª linha header e texto for igual a "nome"
          {
+            
             Loop, parse, dataAllRows, `n
                {
-               msgbox % StrSplit(A_LoopField,",")[ColumnNumber]
-               row.push(a_loopfield)
-               ifequal,a_index,13,break ;prevents from reading columns that are further out se chegar na linha 13 quebrar
+               /*
+                  SALVAR TODAS AS LINHAS DA COLUNA "Nome"
+               */
+               ; msgbox %A_LoopField% ; aqui exibe a linha inteira
+               ; msgbox % columnData := StrSplit(A_LoopField,",")[ColumnNumber] ; Somente o valor da celula da coluna
+               rowsNome.push(StrSplit(A_LoopField,",")[ColumnNumber]) ; Somente o valor da celula da coluna
+               ; ifequal,a_index,13,break ;prevents from reading columns that are further out se chegar na linha 13 quebrar
+               ; ColunaNome := RegExReplace([1], aspa , "") ; 1ª coluna da planilha
                }
-            ColunaNome := RegExReplace([1], aspa , "") ; 1ª coluna da planilha
             ; msgbox "coluna nome " %A_LoopField%
          }
          ; msgbox % StrSplit(LineContent,",")[LineNumber]
        }
+       
       ;  If(StrSplit(A_LoopField,",")[A_Index]){
       ;  }
 
@@ -179,6 +187,7 @@ getDataFromGoogleSheet(urlData){
              ListYoutubeCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
  
        } 
+       msgbox % rowsNome[2]
        ; MODIFICANDO TODAS COMBOBOX PARA POPULAREM OS DADOS DA PLANILHA
        GuiControl,1:, Curso, %ListTopCourses% ; main courses
        GuiControl,1:, CursoWebDev, %ListWebDevCourses% ; web dev courses
