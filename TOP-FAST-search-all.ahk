@@ -31,7 +31,7 @@ guiclose:
 exitapp
 
 fetch:
-URLDownloadToFile,% "https://docs.google.com/spreadsheets/d/" doc "/export?format=csv&id=" doc "&gid=" sht, tmp.csv
+URLDownloadToFile, % "https://docs.google.com/spreadsheets/d/" doc "/export?format=csv&id=" doc "&gid=" sht, tmp.csv
 while !FileExist(a_scriptdir "\tmp.csv")
 	sleep, 100
 fileread, oVar, tmp.csv										; change to your needs
