@@ -91,7 +91,9 @@ sheetURL_SQLQuery := "select * where A matches '.*' AND A is not null"
 sheetURL_SQLQueryEncoded = % GS_EncodeDecodeURI(sheetURL_SQLQuery)
 
 GS_GetCSV_ToListView()
-; msgbox % GS_GetCSV_Column().ColumnName
+test()
+; For index, var in GS_GetCSV_Column(, ".*Nome.*").arrColumn
+;    msgbox %var%
 Return
 
 /*
@@ -263,6 +265,7 @@ GS_GetCSV_ToListView(){
        LV_ModifyCol() 
        LV_ModifyCol(3, 50) 
        ; total de linhas
+       
        TotalLinhas:
          totalLines := LV_GetCount()
          GuiControl, , TotalLinhas, Total de Linhas: %totalLines%
@@ -273,10 +276,9 @@ GS_GetCSV_ToListView(){
 /*
    * FUNÇÃO PARA CAPTURAR AÇÃO AO CLICAR NA LISTVIEW
 */
-GS_GetListView_Click(regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*URL|Link.*"){
+GS_GetListView_Click(regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*URL|Link.*", action := "openLink"){
    Gui Submit, NoHide
-   ; msgbox % regexFindColumnName
-   
+
    ; * CAPTURAR A LINHA SELECIONADA NA LISTVIEW
    NumeroLinhaSelecionada := LV_GetNext() 
    ; * Pesquisar por coluna específica
@@ -294,31 +296,44 @@ GS_GetListView_Click(regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i)
    ; msgbox %TextoLVNome% %TextoLVURL%
 
    ; msgbox % A_GuiEvent
-   if(A_GuiEvent == "DoubleClick"){
-      Run, %TextoLVURL%
-         
+   if(A_GuiEvent == "DoubleClick" && action = "openLink"){ ; abrir link normal
       /*
-         ABRIR NOTION
+         * ABRIR OS LINKS/URLS/DOCUMENTAÇÕES NO NAVEGADOR
+         ! IMPORTANTE: Caso tenha mais de um link na coluna, transformar em um array e fazer um loop para abrir os links
       */
-            if(A_UserName == "Felipe" || A_UserName == "estudos" || A_UserName == "Estudos")
-               {
-                 user := A_UserName
-                 pass := "xrlo1010"
+      For Index, URL in StrSplit(TextoLVURL, " | ")
+         {
+              URL := RegExReplace(URL, "%idiomapt%", "")
+            ;   msgbox %URL%
+              Run, %URL%
+         } 
+   }else if(A_GuiEvent == "DoubleClick" && action = "openAHKChrome"){ ; abrir ahk chrome
+      URL := RegExReplace(TextoLVURL, "%idiomapt%", "")
+      if !(PageInst := Chrome.GetPageByURL(URL, "contains"))
+         {
+            ChromeInst := new Chrome(profileName,URL,"--remote-debugging-port=9222 --remote-allow-origins=* --profile-directory=""Default""",chPath)
+            Notify().AddWindow("Não encontrei o site aberto no Chrome, Vou abrir pra você agora!",{Time:6000,Icon:28,Background:"0x900C3F",Title:"OPS!",TitleSize:15, Size:15, Color: "0xCDA089", TitleColor: "0xE1B9A4"},,"setPosBR")
+            Sleep, 500
+            contador1 := 0
+            while !(PageInst)
+            {
+               Sleep, 500
+               Notify().AddWindow("procurando instância do chrome...!",{Time:6000,Icon:28,Background:"0x1100AA",Title:"ERRO!",TitleSize:15, Size:15, Color: "0xCDA089", TitleColor: "0xE1B9A4"},,"setPosBR")
+               PageInst := Chrome.GetPageByURL(URL, "contains")
+               contador1++
+               if(contador1 >= 30){
+                  PageInst.Disconnect()
+                  break
                }
-             Else
-               {
-                 user := "felipe.lullio@hotmail.com"
-                 pass := "XrLO1000@1010"
-               }
-            RunAs, %user%, %pass%
-            ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
-            Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe "%TextoLinhaSelecionadaNotion%", , Hide
-            RunAs
-            WinActivate, Notion
-   /*
-      CLIQUE COM BOTÃO DIREITO DO MOUSE
-   */
-   }else if(A_GuiEvent == "RightClick"){
+            }
+         }
+         Sleep, 500
+         ; aqui está o fix pra esperar a página carregar
+         PageInst := Chrome.GetPageByURL(URL, "contains")
+         Sleep, 500
+      ; SUPER IMPORTANTE, ATIVAR A TAB/PÁGINA, ACTIVATE, FOCUS
+         PageInst.Call("Page.bringToFront")
+   }else if(A_GuiEvent == "RightClick"){ ; CLIQUE COM BOTÃO DIREITO DO MOUSE
       /*
          ABRIR NOTION
       */
@@ -339,9 +354,122 @@ GS_GetListView_Click(regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i)
       WinActivate, Notion
 
    }
-; GoSub, controlVideos
 }
 
+
+test(){
+global ColumnCategory := GS_GetCSV_Column(, "i)Categoria").arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
+global UniqueColumnCategory := RmvDuplic(ColumnCategory)
+
+sheetData_All := GS_GetCSV() ; Select * limit 1
+sheetData_ColumnDataArr := []
+sheetData_ColumnDataArrSanitize := []
+sheetData_ColumnDataStr := ""
+sheetData_ColumnDataStrSanitize := ""
+sheetData_ColumnPosition := 0
+sheetData_ColumnName := ""
+sheetData_ColumnPosition := ""
+;  regexFindColumn := "i)Categoria"
+
+for key, category in UniqueColumnCategory
+{
+   category%key%%category%Names := []
+   Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+   {
+      LineNumber := A_Index ; Index da linha
+      LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+   Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
+   {
+     ColumnNumber := A_Index ; Index da coluna
+     cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
+     ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
+     ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
+     /*
+        * Se for a linha 1 e se tiver o termo do regex na linha capture os dados da coluna somente
+     */
+     if(RegExMatch(cellContent, category)) ; se for a 1ª linha header e texto for igual a "nome"
+     {
+         ; msgbox %cellContent%
+        sheetData_ColumnName := SubStr(cellContent, 2, -1)
+        category%key%%category%Names.push() 
+        Loop, parse, sheetData_All, `n
+           {
+           /*
+              SALVAR TODAS AS LINHAS DA COLUNA "Nome"
+           */
+           ; msgbox %A_LoopField% ; aqui exibe a linha inteira (inutil)
+           ; msgbox % StrSplit(A_LoopField,",")[ColumnNumber] ; exibe somente o valor da célula da coluna
+           sheetData_ColumnDataArr.push(StrSplit(A_LoopField,",")[ColumnNumber])
+           sheetData_ColumnDataArrSanitize.push(SubStr(StrSplit(A_LoopField,",")[ColumnNumber], 2, -1))
+           sheetData_ColumnPosition := ColumnNumber
+           sheetData_ColumnDataStr.= StrSplit(A_LoopField,",")[ColumnNumber] ", "
+           sheetData_ColumnDataStrSanitize.= SubStr(StrSplit(A_LoopField,",")[ColumnNumber] ", ", 2, -1)
+           }
+        ; msgbox "Dado da coluna: " %A_LoopField%
+     }
+   } ; FIM DO LOOP DA COLUNA
+  } ; FIM DO LOOP DA LINHA
+}
+
+
+}
+
+AHK_GetControls(searchControls := "ComboBox"){
+   Gui, Submit, NoHide
+   ; PEGAR TEXTOS DA PRIMEIRA E SEGUNDA COLUNA DA LISTVIEW
+   WinGet, ActiveControlList, ControlList, A
+   Loop, % LV_GetCount() ; loop through every row
+   {
+      LV_GetText(TextoColuna1, A_Index) ; will get first column by default (Nome do Curso)
+      LV_GetText(TextoColuna2, A_Index, 2) ; will get second column (URL do Curso)
+      ; * CAPTURAR A LINHA SELECIONADA NA LISTVIEW
+      NumeroLinhaSelecionada := LV_GetNext() 
+      ; * Pesquisar por coluna específica
+      getColumnName := GS_GetCSV_Column(, regexFindColumnName)
+      getColumnURL := GS_GetCSV_Column(, regexFindColumnURL)
+
+      posicaoColunaNome := getColumnName.ColumnPosition
+      posicaoColunaURL := getColumnURL.ColumnPosition
+      valueColunaNome := getColumnName.ColumnName
+      valueColunaURL := getColumnURL.ColumnName
+      ; * CAPTURAR VALOR DA COLUNA "NOME"
+      LV_GetText(TextoLVNome, NumeroLinhaSelecionada, posicaoColunaNome) 
+      ; * CAPTURAR VALOR DA COLUNA "URL"
+      LV_GetText(TextoLVURL, NumeroLinhaSelecionada, posicaoColunaURL) 
+      ; msgbox %TextoLVNome% %TextoLVURL%
+      /*
+      CAPTURANDO TODOS OS CONTROLS DA GUI
+      */
+      Loop, Parse, ActiveControlList, `n
+         {
+         
+         ControlGetText, TextoDoControl, %A_LoopField%
+         FileAppend, %a_index%`t%A_LoopField%`t%TextoDoControl%`n, C:\Controls.txt
+            /*
+               CAPTURANDO SOMENTES OS ComboBoXES
+            */
+            if(InStr(A_LoopField, searchControls)) ; se for um combobox
+            {
+               if(TextoDoControl == "GTM1"){
+                  gtm1Folder := "Y:\Season\Analyticsmania\Google Tag Manager Masterclass For Beginners 3.0"
+                  if !FileExist(gtm1Folder)
+                  {
+                  gtm1Folder := "C:\Users\" A_UserName "\Documents\Season\Analyticsmania\Google Tag Manager Masterclass For Beginners 3.0"
+                  }
+                  Run vlc.exe "%gtm1Folder%\PLAYLIST-ADITIONAL-CONTENT.xspf"
+                  Run %gtm1Folder%\PLAYLIST-COMPLETA-BEGGINER.xspf               
+               }else if(TextoDoControl && TextoDoControl = TextoLVNome){
+                  Run, %TextoLVURL%
+               }
+            }
+         }
+   }
+}
+
+AbrirCurso:
+Gui, Submit, NoHide
+AHK_GetControls()
+Return
 
 /*
    ----
