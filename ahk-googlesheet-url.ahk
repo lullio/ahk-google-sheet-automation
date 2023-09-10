@@ -53,11 +53,11 @@ Gui Add, ComboBox, Multi xs+10 yp+20 w280 center vCursoAndamento hwndDimensoesID
 ; Gui Add, ComboBox, Multi xs+10 yp+20 w372 center vCursoAll hwndDimensoesID ,
 Gui Add, ComboBox, Multi x+10 w237 center vCursoYoutube hwndDimensoesID sort,
 Gui Font,
-Gui Add, ListView, altsubmit vCursoDaLista w530 r10 xs+10 y+10 -readonly grid , ID|Nome|URL|Categoria
+Gui Add, ListView, vCursoDaLista gListViewListener w530 r10 xs+10 y+10 -readonly grid ,
 ; LV_Modify()
 Gui Font, S6.5
-Gui Add, Link, w120 y+3 xp+200 vTotalCursos center,
-Gui Add, Button, x+50 w135 h26, Atualizar Lista
+Gui Add, Link, w120 y+3 xp+200 vTotalLinhas center,
+Gui Add, Button, x+50 w135 h26 gGS_GetListView_Update, Atualizar Lista
 
 ; CARREGAR OS DADOS DOS CURSOS DA PLANILHA ANTES DE EXIBIR A GUI, NÃO VAI TER DELAY
 ; GoSub, getData
@@ -74,10 +74,6 @@ Gui, Show,, Abrir Curso e Controlar Video - Felipe Lulio
 
 ; GoSub, controlVideos
 ; Ignorar o erro que o ahk dá e continuar executando o script
-aspa =
-(
-"
-)
 
 /*
    *VARIÁVEIS PARA FORMAR A URL DO GOOGLE SHEET*
@@ -94,6 +90,9 @@ sheetURL_SQLQueryGA4Doc := "select * where D matches '^GA4.*' AND D is not null"
 sheetURL_SQLQuery := "select * where A matches '.*' AND A is not null"
 sheetURL_SQLQueryEncoded = % GS_EncodeDecodeURI(sheetURL_SQLQuery)
 
+GS_GetCSV_ToListView()
+; msgbox % GS_GetCSV_Column().ColumnName
+Return
 
 /*
    *FUNÇÃO PARA DECODIFICAR A QUERY QUE VAI NA URL*
@@ -123,7 +122,7 @@ GS_EncodeDecodeURI(str, encode := true, component := true) {
    msgbox % GS_GetCSV()
 
 */
-GS_GetCSV(sheetURL_key:="1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34", sheetURL_name:="", sheetURL_format:="csv", sheetURL_range:="", sheetURL_SQLQuery:=""){
+GS_GetCSV(sheetURL_SQLQuery:="", sheetURL_key:="1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34", sheetURL_name:="", sheetURL_format:="csv", sheetURL_range:=""){
    
    fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "/gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq=" GS_EncodeDecodeURI(sheetURL_SQLQuery)
    ; msgbox % fullSheetURL
@@ -138,13 +137,20 @@ GS_GetCSV(sheetURL_key:="1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34", sheetURL
    ; Return SubStr(googleSheetData, 2,-1) ; remove o primeiro e último catactere (as aspas)
    Return googleSheetData
 }
-
-GS_GetCSV_Data(JS_VariableName:="arr"){
+/*
+   * FUNÇÃO PARA CAPTURAR DADOS DE UMA COLUNA ESPECÍFICA / PESQUISAR COLUNA
+*/
+GS_GetCSV_Column(JS_VariableName:="arr", regexFindColumn := "i).*"){
     Gui Submit, NoHide
-    sheetData_All := GS_GetCSV()
+    sheetData_All := GS_GetCSV() ; Select * limit 1
     sheetData_ColumnDataArr := []
+    sheetData_ColumnDataArrSanitize := []
     sheetData_ColumnDataStr := ""
-    
+    sheetData_ColumnDataStrSanitize := ""
+    sheetData_ColumnPosition := 0
+    sheetData_ColumnName := ""
+    sheetData_ColumnPosition := ""
+   ;  regexFindColumn := "i)Categoria"
 
     Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
        {
@@ -152,12 +158,16 @@ GS_GetCSV_Data(JS_VariableName:="arr"){
           LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
        Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
        {
-         ColumnNumber := A_Index ; Index da linha
+         ColumnNumber := A_Index ; Index da coluna
          cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
          ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
          ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
-         if(InStr(cellContent, "Nome")) ; se for a 1ª linha header e texto for igual a "nome"
+         /*
+            * Se for a linha 1 e se tiver o termo do regex na linha capture os dados da coluna somente
+         */
+         if(LineNumber = 1 && RegExMatch(cellContent, regexFindColumn)) ; se for a 1ª linha header e texto for igual a "nome"
          {
+            sheetData_ColumnName := SubStr(cellContent, 2, -1)
             Loop, parse, sheetData_All, `n
                {
                /*
@@ -166,32 +176,77 @@ GS_GetCSV_Data(JS_VariableName:="arr"){
                ; msgbox %A_LoopField% ; aqui exibe a linha inteira (inutil)
                ; msgbox % StrSplit(A_LoopField,",")[ColumnNumber] ; exibe somente o valor da célula da coluna
                sheetData_ColumnDataArr.push(StrSplit(A_LoopField,",")[ColumnNumber])
+               sheetData_ColumnDataArrSanitize.push(SubStr(StrSplit(A_LoopField,",")[ColumnNumber], 2, -1))
+               sheetData_ColumnPosition := ColumnNumber
                sheetData_ColumnDataStr.= StrSplit(A_LoopField,",")[ColumnNumber] ", "
+               sheetData_ColumnDataStrSanitize.= SubStr(StrSplit(A_LoopField,",")[ColumnNumber] ", ", 2, -1)
                }
-            ; msgbox "coluna nome " %A_LoopField%
+            ; msgbox "Dado da coluna: " %A_LoopField%
          }
-       }
-       
-      ;  If(StrSplit(A_LoopField,",")[A_Index]){
-      ;  }
+       } ; FIM DO LOOP DA COLUNA
+      } ; FIM DO LOOP DA LINHA
+       /*
+       VARIÁVEL QUE FINALIZA A CONVERSÃO PARA UMA VARIÁVEL JAVASCRIPT
+       - troca a última vírgula por ]; para finalizar a variável do tipo array
+      */
+       sheetData_ColumnDataStrJS = % "let " JS_VariableName " = [" RegExReplace(sheetData_ColumnDataStr, ",\s+$", "];")
+       Return {variavelJavascript: sheetData_ColumnDataStrJS, arrColumn: sheetData_ColumnDataArr, arrColumnSanitize: sheetData_ColumnDataArrSanitize, strColumn: sheetData_ColumnDataStr, strColumnSanitize: sheetData_ColumnDataStrSanitize, ColumnPosition: sheetData_ColumnPosition, ColumnName: sheetData_ColumnName}
+}
+/*
+   VARIÁVEIS QUE CONTÉM OS VALORES DAS COLUNAS DA PRIMEIRA LINHA
+*/
+global ColumnCategory := GS_GetCSV_Column(, "i)Categoria").arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
+global UniqueColumnCategory := RmvDuplic(ColumnCategory)
+; Msgbox % ColumnCategory.arrColumnSanitize[5]
 
+/*
+   * FUNÇÃO PARA EXIBIR OS DADOS NA LISTVIEW
+*/
+GS_GetCSV_ToListView(){
+   Gui Submit, NoHide   
+    sheetData_All := GS_GetCSV() ; Select * limit 1
+
+   ;  For key, index in UniqueColumnCategory
+   ;    msgbox index
+
+    Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+       {
+          LineNumber := A_Index ; Index da linha
+          LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+       Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
+       {
+         ColumnNumber := A_Index ; Index da coluna
+         cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
+         ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
+         ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
+       } ; FIM DO LOOP DA COLUNA
+         totalColunas := ColumnNumber
          /*
-            COLUNAS DA PLANILHA
+           *AUTOMATIZAR A INSERÇÃO DAS LINHAS E COLUNAS
          */
-          Coluna1 := RegExReplace(StrSplit(A_LoopField,",")[1], aspa , "") ; 1ª coluna da planilha
-         ;  msgbox %Coluna1%
-          Coluna2 := RegExReplace(StrSplit(A_LoopField,",")[2], aspa , "") ; 2ª coluna da planilha
-          Coluna3 := RegExReplace(StrSplit(A_LoopField,",")[3], aspa , "") ; 3ª coluna da planilha
-          Coluna4 := RegExReplace(StrSplit(A_LoopField,",")[4], aspa , "") ; 4ª coluna da planilha
-          Coluna5 := RegExReplace(StrSplit(A_LoopField,",")[5], aspa , "") ; 5ª coluna da planilha
-          Coluna6 := RegExReplace(StrSplit(A_LoopField,",")[6], aspa , "") ; 6ª coluna da planilha
-          Coluna7 := RegExReplace(StrSplit(A_LoopField,",")[7], aspa , "") ; 7ª coluna da planilha
-         /*
-            ADICIONAR AS LINHAS/COLUNAS NA PRIMEIRA LISTIVEW DA GUI
-         */
-          ; LV_Add("" , Coluna1, SubStr(Coluna2, 2,-1), SubStr(Coluna3, 2,-1), SubStr(Coluna4, 2,-1), SubStr(Coluna5, 2,-1)) ; serve para remover as aspas na frente e final         
-          LV_Add("" , Coluna1, Coluna2, Coluna3, Coluna4)
-          
+         sheetData_ColumnHeaderStr := ""
+         aspa := """"
+         Loop, %totalColunas%
+         {
+            Coluna%A_Index% := RegExReplace(StrSplit(A_LoopField,",")[A_Index], aspa , "")
+            ; sheetData_ColumnHeaderStr .= Coluna%A_Index% ; versão com aspas
+            sheetData_ColumnHeaderStr .= Coluna%A_Index% ; versão sem aspas
+            if(A_Index != totalColunas) ; se for o último índice não adicionar vírgula, para não ficar uma vírgula sozinha no final
+               sheetData_ColumnHeaderStr .= ","
+            ; inserir as colunas
+            If(LineNumber = 1) ; adicionar as colunas com base na primeira linha
+            {
+              LV_InsertCol(A_Index, "center auto", Coluna%A_Index%)
+            ;   msgbox %A_LoopField%
+              ColunaHeader%A_Index% := SubStr(StrSplit(A_LoopField,",")[A_Index], 2, -1)
+            }
+         }
+         If(LineNumber != 1) ; adicionar todas as linhas menos a primeira
+            LV_Add("" , Coluna1, Coluna2, Coluna3, Coluna4, Coluna5, Coluna6, Coluna7, Coluna8, Coluna9, Coluna10, Coluna11, Coluna12, Coluna13, Coluna14, Coluna15, Coluna16, Coluna17, Coluna18, Coluna19, Coluna20) 
+         ; msgbox %sheetData_ColumnHeaderStr%
+         ;  Coluna1 := RegExReplace(StrSplit(A_LoopField,",")[1], aspa , "") ; 1ª coluna da planilha
+         ; LV_Add("" , Coluna1, Coluna2, Coluna3, Coluna4) ; manter as aspas
+         ; LV_Add("" , SubStr(Coluna1, 2,-1), SubStr(Coluna2, 2,-1), SubStr(Coluna3, 2,-1), SubStr(Coluna4, 2,-1), SubStr(Coluna5, 2,-1)) ; remover as aspas        
          /*
             O CONTEÚDO NA PLANILHA POSSUI OS TEXTOS "%idiomapt%", vamos tratar isso para não ser considerado um erro na url
          */
@@ -202,64 +257,123 @@ GS_GetCSV_Data(JS_VariableName:="arr"){
                ;  msgbox % URLDocTratada
             ;  if(NomeDocumentacao != "URL")
             ;     Run % URLDocTratada
-          }
-          /*
-            !ORGANIZAR O CONTEÚDO DA PLANILHA POR CATEGORIA, SEPARAR CADA NOME NA SUA DEVIDA COMBOBOX/LISTBOX
-            msgbox % StrSplit(Coluna3, " | ").MaxIndex() ; exibir o tamanho do array
-          */
-          ListAllCourses .= RegexReplace(StrSplit(A_LoopField,",")[1] "|", aspa, "") ; salvar todos os cursos
-          If InStr(Coluna3, "sql")
-             ListSQLCourses .= RegexReplace(StrSplit(A_LoopField,",")[1] "|", aspa, "")
-          If InStr(Coluna3, "web-dev")
-             ListWebDevCourses .= RegexReplace(StrSplit(A_LoopField,",")[1] "|", aspa, "")
-          If InStr(Coluna3, "javascript") || If InStr(Coluna3, "js-frameworks") 
-             ListJavaScriptCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
-          If InStr(Coluna3, "analytics") || InStr(Coluna3, "ads") || InStr(Coluna3, "wordpress") 
-             ListAnalyticsCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
-          If InStr(Coluna3, "linux") || InStr(Coluna3, "redes") || InStr(Coluna3, "hacking") 
-             ListLinuxCourses .= RegExReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
-          If InStr(Coluna3, "top-rated") 
-             ListTopCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
-          If InStr(Coluna3, "web-server") 
-             ListWebServerCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
-          If InStr(Coluna3, "em-andamento") 
-             ListAndamentoCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
-          If InStr(Coluna2, "youtube.com") 
-             ListYoutubeCourses .= RegexReplace(StrSplit(A_LoopField, ",")[1] "|", aspa, "")
- 
-       } 
-       /*
-       VARIÁVEL QUE FINALIZA A CONVERSÃO PARA UMA VARIÁVEL JAVASCRIPT
-       - troca a última vírgula por ]; para finalizar a variável do tipo array
-      */
-       sheetData_ColumnDataStrJS = % "let " JS_VariableName " = [" RegExReplace(sheetData_ColumnDataStr, ",\s+$", "];")
+          }          
+       } ; FIM DO LOOP DA LINHA
 
-       msgbox % sheetData_ColumnDataStrJS
-       ; MODIFICANDO TODAS COMBOBOX PARA POPULAREM OS DADOS DA PLANILHA
-       GuiControl,1:, Curso, %ListTopCourses% ; main courses
-       GuiControl,1:, CursoWebDev, %ListWebDevCourses% ; web dev courses
-       GuiControl,1:, CursoJavaScript, %ListJavaScriptCourses% ; analytics mkt courses
-       GuiControl,1:, CursoMkt, %ListAnalyticsCourses% ; analytics mkt courses
-       GuiControl,1:, CursoSQL, %ListSQLCourses% ; analytics mkt courses
-       GuiControl,1:, CursoWebServer, %ListWebServerCourses% ; analytics mkt courses
-       GuiControl,1:, CursoLinux, %ListLinuxCourses% ; analytics mkt courses
-       GuiControl,1:, CursoAll, %ListAllCourses% ; analytics mkt courses
-       GuiControl,1:, CursoAndamento, %ListAndamentoCourses% ; cursos em andamento
-       GuiControl,1:, CursoYoutube, %ListYoutubeCourses% ; cursos do youtube
- 
-       LV_ModifyCol()
- 
-
-       ; exibir total de linhas
-       totalCursos:
-          totalLines := LV_GetCount()
-          GuiControl, , TotalCursos, Total de Cursos: %totalLines%
-       Return
- Return
+       LV_ModifyCol() 
+       LV_ModifyCol(3, 50) 
+       ; total de linhas
+       TotalLinhas:
+         totalLines := LV_GetCount()
+         GuiControl, , TotalLinhas, Total de Linhas: %totalLines%
+       Return {nomesColunas: coco, colunasHeader: [ColunaHeader1, ColunaHeader2, ColunaHeader3, ColunaHeader4, ColunaHeader5, ColunaHeader6, ColunaHeader7, ColunaHeader8, ColunaHeader9, ColunaHeader10, ColunaHeader11, ColunaHeader12, ColunaHeader13]}
 }
-GS_GetCSV_Data()
- 
- 
+; GS_GetCSV_ToListView()
+
+/*
+   * FUNÇÃO PARA CAPTURAR AÇÃO AO CLICAR NA LISTVIEW
+*/
+GS_GetListView_Click(regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*URL|Link.*"){
+   Gui Submit, NoHide
+   ; msgbox % regexFindColumnName
+   
+   ; * CAPTURAR A LINHA SELECIONADA NA LISTVIEW
+   NumeroLinhaSelecionada := LV_GetNext() 
+   ; * Pesquisar por coluna específica
+   getColumnName := GS_GetCSV_Column(, regexFindColumnName)
+   getColumnURL := GS_GetCSV_Column(, regexFindColumnURL)
+
+   posicaoColunaNome := getColumnName.ColumnPosition
+   posicaoColunaURL := getColumnURL.ColumnPosition
+   valueColunaNome := getColumnName.ColumnName
+   valueColunaURL := getColumnURL.ColumnName
+   ; * CAPTURAR VALOR DA COLUNA "NOME"
+   LV_GetText(TextoLVNome, NumeroLinhaSelecionada, posicaoColunaNome) 
+   ; * CAPTURAR VALOR DA COLUNA "URL"
+   LV_GetText(TextoLVURL, NumeroLinhaSelecionada, posicaoColunaURL) 
+   ; msgbox %TextoLVNome% %TextoLVURL%
+
+   ; msgbox % A_GuiEvent
+   if(A_GuiEvent == "DoubleClick"){
+      Run, %TextoLVURL%
+         
+      /*
+         ABRIR NOTION
+      */
+            if(A_UserName == "Felipe" || A_UserName == "estudos" || A_UserName == "Estudos")
+               {
+                 user := A_UserName
+                 pass := "xrlo1010"
+               }
+             Else
+               {
+                 user := "felipe.lullio@hotmail.com"
+                 pass := "XrLO1000@1010"
+               }
+            RunAs, %user%, %pass%
+            ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
+            Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe "%TextoLinhaSelecionadaNotion%", , Hide
+            RunAs
+            WinActivate, Notion
+   /*
+      CLIQUE COM BOTÃO DIREITO DO MOUSE
+   */
+   }else if(A_GuiEvent == "RightClick"){
+      /*
+         ABRIR NOTION
+      */
+      if(A_UserName == "Felipe" || A_UserName == "estudos" || A_UserName == "Estudos")
+         {
+           user := A_UserName
+           pass := "xrlo1010"
+         }
+       Else
+         {
+           user := "felipe.lullio@hotmail.com"
+           pass := "XrLO1000@1010"
+         }
+      RunAs, %user%, %pass%
+      ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
+      Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe "%TextoLinhaSelecionadaNotion%", , Hide
+      RunAs
+      WinActivate, Notion
+
+   }
+; GoSub, controlVideos
+}
+
+
+/*
+   ----
+   ----
+   * LABELS
+*/
+; LABEL PARA CAPTURAR CLIQUE NA LISTVIEW
+ListViewListener:
+   GS_GetListView_Click()
+Return
+; LABEL PARA CAPTURAR O CLIQUE NO BOTÃO ATUALIZAR LISTA
+GS_GetListView_Update:
+      LV_Delete()
+      GS_GetCSV_ToListView()
+Return
+
+/*
+   * FUNÇÃO PARA REMOVER DADOS DUPLICADOS DE UM ARRAY
+*/
+RmvDuplic(object) {
+   secondobject:=[]
+   Loop % object.Length()
+   {
+      value:=Object.RemoveAt(1) ; otherwise Object.Pop() a little faster, but would not keep the original order
+      Loop % secondobject.Length()
+         If (value=secondobject[A_Index])
+             Continue 2 ; jump to the top of the outer loop, we found a duplicate, discard it and move on
+      secondobject.Push(value)
+   }
+   Return secondobject
+}
+
 ;  getData:
 ;     Gui Submit, NoHide
 ;           ; query para selecionar apenas a primeira coluna
@@ -379,8 +493,8 @@ GS_GetCSV_Data()
  
 
 ;        ; exibir total de linhas
-;        totalCursos2:
+;        TotalLinhas2:
 ;           totalLines := LV_GetCount()
-;           GuiControl, , TotalCursos, Total de Cursos: %totalLines%
+;           GuiControl, , TotalLinhas, Total de Cursos: %totalLines%
 ;        Return
 ;  Return
