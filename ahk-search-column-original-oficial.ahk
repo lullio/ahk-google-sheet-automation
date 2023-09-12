@@ -12,10 +12,10 @@ gui, add, statusbar
 gui, add, listview, x1 y1 w1175 r10 grid vMyLV,name|year_start|year_end|position|height|height (f)|height (in)|height (m)|weight|weight (kg)|LMD (kg/m)|birth_date|college
 GuiControl, -Redraw, MyLV
 for x,y in strsplit(oVar,"`n","`r")
-	if instr(y,needle)
+	if instr(y,needle) ; se encontrar o texto digitado no searchbox na linha
 		{
 		row := [], ++cnt
-		loop, parse, y, CSV
+		loop, parse, y, CSV ; dividir a linha em células
 			if (a_index <= 13)																	;or if a_index in 1,4,5
 				row.push(a_loopfield)
 		LV_add("",row*)
