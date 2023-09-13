@@ -41,15 +41,171 @@ SkinForm(DLLPath,Param1 = "Apply", SkinName = ""){
   }
 }
 
-/* SCRIPT COMEÇA AQUI
+/*
+   *VARIÁVEIS PARA FORMAR A URL DO GOOGLE SHEET*
+   - Somente a sheetURL_key é obrigatória
+     
+   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq=" sheetURL_SQLQueryEncoded
+   msgbox % fullSheetURL 
 */
-TTip := ""
-Dica := ""
+
+sheetURL_key := "1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34" ; id da pasta de trabalho/arquivo
+sheetURL_name := "All-Docs" ; nome ou id da aba / guia / planilha
+sheetURL_format := "csv" ; csv, html ou json
+sheetURL_range := "" ; A1:C99
+sheetURL_SQLQueryGA4Doc := "select * where D matches '^GA4.*' AND D is not null"
+sheetURL_SQLQuery := "select * where A matches '.*' AND A is not null"
+sheetURL_SQLQueryEncoded = % GS_EncodeDecodeURI(sheetURL_SQLQuery)
 global i:=1 ; contas quantas vezes clicou no botão (botão Pesquisar)
 
-; CRIAR A GUI
-; Gui New, +AlwaysOnTop, MinhaGui
-/* SCRIPT COMEÇA AQUI
+RegExMatch("https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043", "\/d\/(.+)\/", capture_sheetURL_key)
+RegExMatch("https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043", "#gid=(.+)", capture_sheetURL_name)
+msgbox % capture_sheetURL_key1 ; 1 serve para retornar o 1º capturing group(o que está entre parênteses )
+msgbox % capture_sheetURL_name1 ; 1 serve para retornar o 1º capturing group(o que está entre parênteses )
+
+; VARIÁVEIS INI (ARQUIVO DE CONFIGURAÇÃO)
+if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
+   SplitPath,A_AhkPath,,dir
+   if(!FileExist(correct:=dir "\AutoHotkeyU32.exe")){
+      MsgBox error
+      ExitApp
+   }
+   Run,"%correct%" "%A_ScriptName%",%A_ScriptDir%
+   ExitApp
+}
+
+if !InStr(A_OSVersion, "10.")
+  appdata := A_ScriptDir
+else
+  appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
+
+global script := {base			: script
+            ,name			: regexreplace(A_ScriptName, "\.\w+")
+            ,version		: "1.0.0"
+            ,author		: "Felipe Lullio"
+            ,email			: "felipe@lullio.com.br"
+            ,homepagetext	: "lullio.com.br"
+            ,homepagelink	: "lullio.com.br/blog/snip?src=app"
+            ,donateLink	: ""
+            ,resfolder		: appdata "\res"
+            ,iconfile		: appdata "\res\sct.ico"
+            ,configfolder	: appdata
+            ,configfile	: appdata "\settings.ini"}
+            if !fileExist(script.resfolder)
+               {
+                  FileCreateDir, % script.resfolder
+                  FileInstall, res\sct.ico, % script.iconfile
+               }
+               
+               ;@Ahk2Exe-SetMainIcon res\sct.ico
+               ; Menu, Tray, Icon, sct.ico
+               ; msgbox % script.configfile 
+               ;~ Menu,Tray,Add,"Windows and left mouse click"
+               IniRead, ShowUsage, % script.configfile, Settings, ShowUsage, % true
+               
+               Menu, Tray, NoStandard ;removes default options
+               Menu, Tray, Add	; to divide from standard menu, remove when above line is uncommented
+               ; Menu, Tray, Add, Hotkeys, HotkeysGUI
+               ; Menu, Tray, Add, Email Signature, SignatureGUI
+               ; Menu, Tray, Add
+               ; ; Menu, Tray, Add, Show Usage at Startup, ShowUsageSet
+               ; Menu, Tray, % ShowUsage ? "Check" : "Uncheck", Show Usage at Startup
+               ; Menu, Tray, Add
+               ; Menu, Tray, Add, Clear Settings, ClearSettings
+               ; Menu, Tray, Add, Check for Updates, Update
+               ; Menu, Tray, Add, About, AboutGUI
+               ; Menu, Tray, Add
+               ; Menu, Tray, Add,Exit App,Exit
+               ; Menu, Tray, Default, Hotkeys
+               
+               if (!FileExist(script.configfile))
+               {
+                  FileCreateDir % regexreplace(script.configfile, "^(.*)\\([^\\]*)$", "$1")
+                  FileAppend,, % script.configfile, UTF-8-RAW
+               
+                  IniWrite, % true, % script.configfile, Settings, FirstRun
+                  IniWrite, % true, % script.configfile, Settings, ShowUsage
+                  ; Gosub HotkeysGUI
+               }
+               else
+               {
+                  IniWrite, % false, % script.configfile, Settings, FirstRun
+                  ; Gosub SetHotkeys
+               }
+               
+               ; if (ShowUsage)
+               ;    Gosub ShowUsageGUI
+               ; return
+;                ShowUsageGUI:
+; 	FileGetSize, icosize, res\sct.ico
+; 	FileRead, icobin, *c res\sct.ico
+; 	base64ico := Base64Enc(icobin, icosize)
+; 	info =
+; 	(
+; 		<!DOCTYPE html>
+; 		<html lang="en" dir="ltr">
+; 			<head>
+; 				<meta charset="utf-8">
+; 					<meta http-equiv="X-UA-Compatible" content="IE=edge">
+; 					<style media="screen">
+; 						h2
+; 						{
+; 							text-align:center;
+; 							color:SteelBlue;
+; 						}
+; 						p
+; 						{
+; 							text-align:center;
+; 						}
+; 						li
+; 						{
+; 							margin-bottom:15px;
+; 						}
+; 						ol.secondary li
+; 						{
+; 							margin-bottom:5px;
+; 						}
+; 						img
+; 						{
+; 							width:35px;
+; 							height:35px;
+; 						}
+; 					</style>
+; 			</head>
+; 			<body>
+; 				<h2>Bem Vindo!</h2>
+; 				<p>Veja o tutorial <a href="https://www.the-automator.com/WindowSnippingVideo">nesse vídeo</a>, para aprender sobre a ferramenta.</p>
+; 				<hr>
+; 				<ol>
+; 					<li>Após abrir a aplicação aparece o ícone no system tray
+; 					<img src="data:image/x-icon;base64,%base64ico%" style="padding-left:15px"></li>
+; 					<li>If you right-click the icon you'll see the below menu items</li>
+; 						<ol type="a" class="secondary">
+; 							<li>Hotkeys (select the key combinations with the left mouse button)</li>
+; 							<li>Email signature (customizable Outlook signature)</li>
+; 							<li>About ( Links to website and <strong>donation</strong> button )</li>
+; 							<li>Check for updates (will look to see if there is a newer version of this program)</li>
+; 							<li>Exit app (Closes this program)</li>
+; 						</ol>
+; 				</ol>
+; 				<p>More tools at <a href="https://www.the-automator.com/">the-Automator.com</a>
+; 			</body>
+; 		</html>
+; 	)
+; 	gui showusage:new, +toolwindow
+; 	gui margin, 0,0
+; 	gui color, white
+; 	gui add, activex, w600 h380 vdoc, htmlfile
+; 	gui margin, 0,10
+; 	gui add, checkbox, x10 y+10 checked%ShowUsage% gShowUsageSet vShowUsageShow, % "Show Usage at Startup"
+; 	doc.write(info)
+; 	gui show
+; return
+/*
+   * CRIAR A GUI
+   * CONTROLS
+   *
+   *
 */
 
 Gui, Destroy
@@ -58,15 +214,18 @@ gui, font, S11 ;Change font size to 12
 /*
 MENU BAR
 */
-Menu, FileMenu, Add, &Abrir Planilha`tCtrl+N, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta Drive`tCtrl+N, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha`tCtrl+O, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Drive`tCtrl+D, MenuAbrirLink
 Menu, FileMenu, Add, &Reiniciar o App, MenuAcoesApp
 Menu, FileMenu, Add, &Sair do App, MenuAcoesApp
 
-Menu, EditMenu, Add, Copy`tCtrl+C, MenuAbrirLink
-Menu, EditMenu, Add, Past`tCtrl+V, MenuAbrirLink
+Menu, EditMenu, Add, Trocar Planilha(Arquivo)`tCtrl+T, MenuEditarBase
+Menu, EditMenu, Add, Trocar Planilha(Aba)`tCtrl+A, MenuEditarBase
+Menu, EditMenu, Add, Alterar Formato de Exportação`tCtrl+A, MenuEditarBase
+Menu, EditMenu, Add, Alterar Range de Dados`tCtrl+A, MenuEditarBase
+Menu, EditMenu, Add, Definir query para Planilha`tCtrl+A, MenuEditarBase
 Menu, EditMenu, Add ; with no more options, this is a seperator
-Menu, EditMenu, Add, Delete`tDel, MenuAbrirLink
+Menu, EditMenu, Add, Delete`tDel, MenuEditarBase
 
 Menu, HelpMenu, Add, &Sobre o programa, MenuAbrirLink
 Menu, HelpMenu, Add, &Desenvolvedor, MenuAbrirLink
@@ -75,7 +234,10 @@ Menu, HelpMenu, Add, &WhatsApp, MenuAbrirLink
 ; Attach the sub-menus that were created above.
 Menu, MyMenuBar, Add, &Arquivo, :FileMenu
 ; Menu, MyMenuBar, Add, &Editar, :EditMenu
+; Menu, MyMenuBar, Add, &Editar, :EditMenu
+Menu, MyMenuBar, Add, &Editar, :EditMenu
 Menu, MyMenuBar, Add, &Ajuda, :HelpMenu
+
 Gui, Menu, MyMenuBar ; Attach MyMenuBar to the GUI
 
 /*
@@ -318,17 +480,10 @@ gui, font, S11
 gui, Add, Button, xs+10 y+30 w100  Default, &Abrir Doc
 gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
 
-
-
-; test()
 Gui, Show, AutoSize , Web Analytics Links Helper - Felipe Lullio
 Gui, ListView, LVAll
 GS_GetCSV_ToListView()
 
-RegExMatch("https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043", "\/d\/(.+)\/", capture_sheetURL_key)
-RegExMatch("https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043", "#gid=(.+)", capture_sheetURL_name)
-msgbox % capture_sheetURL_key1 ; 1 serve para retornar o 1º capturing group(o que está entre parênteses )
-msgbox % capture_sheetURL_name1 ; 1 serve para retornar o 1º capturing group(o que está entre parênteses )
 
 /*
    VARIÁVEIS QUE CONTÉM OS VALORES DAS COLUNAS DA PRIMEIRA LINHA
@@ -342,6 +497,7 @@ TRATAMENTO DO MENU BAR
 MenuHandler:
 ; MsgBox, %A_ThisMenuItem%
 return
+
 MenuFileOpen:
   ; ^n::
   ; MsgBox, Open Menu was clicked
@@ -394,21 +550,7 @@ DropDownComplete(DocID)
 ; GoSub, controlVideos
 ; Ignorar o erro que o ahk dá e continuar executando o script
 
-/*
-   *VARIÁVEIS PARA FORMAR A URL DO GOOGLE SHEET*
-   - Somente a sheetURL_key é obrigatória
-     
-   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq=" sheetURL_SQLQueryEncoded
-   msgbox % fullSheetURL 
-*/
 
-sheetURL_key := "1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34" ; id da pasta de trabalho/arquivo
-sheetURL_name := "All-Docs" ; nome ou id da aba / guia / planilha
-sheetURL_format := "csv" ; csv, html ou json
-sheetURL_range := "" ; A1:C99
-sheetURL_SQLQueryGA4Doc := "select * where D matches '^GA4.*' AND D is not null"
-sheetURL_SQLQuery := "select * where A matches '.*' AND A is not null"
-sheetURL_SQLQueryEncoded = % GS_EncodeDecodeURI(sheetURL_SQLQuery)
 
 
 
@@ -893,18 +1035,111 @@ AtualizarPlanilha:
 Return
 
 /*
-TRATAMENTO DO MENU BAR
+* LABELS DO MENU BAR
+***
 */
+
 MenuAcoesApp:
 If(InStr(A_ThisMenuItem, "Sair"))
    ExitApp
 Else If(InStr(A_ThisMenuItem, "Reiniciar"))
    Reload
 return
+/*
+
+*/
+ValidarLink:
+/*
+   IMPORTANTE:
+   A COLUNA E DA PLANILHA PRECISA TER UMA FÓRMULA PARA GERAR O ARRAY DOS DADOS
+*/
+   Gui Submit, NoHide
+   ; msgbox %templateDimensoes%
+
+   ; atualizar a url do google sheet TEMPLATE 1
+   if(PlanilhaLink = "Documentações Analytics")
+      {
+         
+      }
+      ; TEMPLATE 2
+      else if(PlanilhaLink = "Documentações Programação")
+      {
+         
+      }
+      else if(PlanilhaLink = "Cursos")
+      {
+         
+      }
+      else if(PlanilhaLink = "Relatórios")
+      {
+         
+      }
+      else if(PlanilhaLink = "Outros")
+      {
+         
+      }
+      ; TRATAR PELA URL DA PLANILHA
+      Else{
+          if(RegExMatch(PlanilhaLink, "i).*docs.google.com/.+\/d\/.+\/")){
+            RegExMatch(PlanilhaLink, "i).*\/d\/.+\/", UrlCode) 
+            ; aceitar e usar o iniread iniread
+          }else{
+            MsgBox, 4112 , Erro na URL do Site!, URL Inválida`n- Copie e Cole uma URL do Google Sheets válida!
+            ; Resetar/Limpar o valor do ComboBox
+            GuiControl,ConfigFile:Choose, PlanilhaLink, ""
+          }
+          
+      }
+
+Return
+MenuEditarBase:
+   If(InStr(A_ThisMenuItem, "trocar planilha(arquivo)"))
+   {
+       ; ^n::
+  ; MsgBox, Open Menu was clicked
+  Gui, ConfigFile:Font, S11
+  Gui, ConfigFile:New, +AlwaysOnTop -Resize -MinimizeBox -MaximizeBox, Alterar Configurações
+  /*
+      * COLUNA 1
+  */
+  Gui, ConfigFile:Add, Text,center h20 +0x200 section, Alterar Link da Planilha:
+  Gui ConfigFile:Add, ComboBox, y+5 w200 center vPlanilhaLink hwndDimensoesID gValidarLink, Documentações Analytics|Documentações Programação|Cursos|Relatórios
+
+  Gui, ConfigFile:Add, Text,center h20 +0x200, Nome/ID da aba da Planilha(Worksheet)
+  Gui, ConfigFile:Add, Edit, vPlanilhaNomeId w200 y+5
+
+  /*
+      * COLUNA 2
+  */
+  Gui, ConfigFile:Add, Text, ys x+5 center h20 +0x200, Tipo de Exportação:
+  Gui, ConfigFile:Add, ComboBox, vPlanilhaTipoExportacao w100 hwndCursosIDAll y+5 w200 center, CSV||HTML|JSON
+  Gui, ConfigFile:Add, Text, center h20 +0x200, Range de Dados:
+  Gui, ConfigFile:Add, Edit, vPlanilhaRange w200 y+5
+  /*
+      * FORA DAS COLUNAS
+  */
+  
+  Gui, ConfigFile:Add, Text, xs y+10 center h20 +0x200, Query: 
+  Gui, ConfigFile:Add, Edit, vPlanilhaQuery w420 y+5 r2, select * where A matches '.*' AND A is not null
+
+  gui, font, S13 ;Change font size to 12
+  gui, ConfigFile:Add, Button, center y+15 w100 h25 Default, &Salvar
+  Gui, ConfigFile:Show, xCenter yCenter
+  ControlFocus, Edit1, Cadastrar Nova Doc - Felipe Lullio
+   }
+   Else If(InStr(A_ThisMenuItem, "trocar planilha(aba)"))
+      run x
+   Else If(InStr(A_ThisMenuItem, "alterar formato de exporta"))
+      Run x
+   Else If(InStr(A_ThisMenuItem, "alterar range"))
+      Run x
+   Else If(InStr(A_ThisMenuItem, "query"))
+      Run x
+Return
 
 MenuAbrirLink:
 ; MsgBox, %A_ThisMenuItem%
-If(InStr(A_ThisMenuItem, "planilha"))
+If(InStr(A_ThisMenuItem, "abrir planilha"))
    Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit?usp=sharing"
 Else If(InStr(A_ThisMenuItem, "Pasta Drive"))
    Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1m9rlPqx710icPobioyCU4FrcswwVGsdI?usp=sharing"
