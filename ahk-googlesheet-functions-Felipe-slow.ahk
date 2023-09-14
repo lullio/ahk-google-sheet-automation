@@ -647,9 +647,9 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
           }          
        } ; FIM DO LOOP DA LINHA
 
-       LV_ModifyCol(1) 
-       LV_ModifyCol(2, 250) 
-       LV_ModifyCol(3) 
+       LV_ModifyCol(1, "30 Right") 
+       LV_ModifyCol(2, "250 Left") 
+       LV_ModifyCol(3, "200 Left") 
        
        ; total de linhas
        TotalLinhas:
@@ -748,7 +748,7 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
 test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    global ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
    global UniqueColumnCategory := RmvDuplic(ColumnCategory)
-
+msgbox % ColumnCategory
    sheetData_All := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId) ; Select * limit 1
    sheetData_ColumnDataArr := []
    sheetData_ColumnDataArrSanitize := []
