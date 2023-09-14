@@ -589,7 +589,7 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
    fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
    ; msgbox %PlanilhaTipoExportacao% %PlanilhaLink% %PlanilhaNomeId% %PlanilhaRange% %PlanilhaQuery%
    sheetData_All := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-   msgbox % sheetData_All
+   ; msgbox % sheetData_All
       
    ;  sheetData_All := GS_GetCSV() ; Select * limit 1
 
@@ -663,7 +663,7 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
 /*
    * FUNÇÃO PARA CAPTURAR AÇÃO AO CLICAR NA LISTVIEW
 */
-GS_GetListView_Click(idioma, regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*URL|Link.*", action := "openLink" ){
+GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId, regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*", action := "openLink"){
    Gui Submit, NoHide
    ; * CAPTURAR A LINHA SELECIONADA NA LISTVIEW
    NumeroLinhaSelecionada := LV_GetNext() 
@@ -689,6 +689,7 @@ GS_GetListView_Click(idioma, regexFindColumnName:= ".*Nome.*", regexFindColumnUR
          ! IMPORTANTE: Caso tenha mais de um link na coluna, transformar em um array e fazer um loop para abrir os links
       */
       URLSanitized := StrReplace(TextoLVURL, "%idiomapt%", idioma)
+      ; msgbox % URLSanitized
       For Index, URL in StrSplit(URLSanitized, " | ")
          {
               Run, %URL%
@@ -916,8 +917,12 @@ GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExpo
    * FUNÇÃO PARA ATUALIZAR PLANILHA, RESET NA PLANILHA
 */
 GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
-   LV_Delete()
+   LV_Delete() ; deletar todas as linhas
+   ; deletar todas as colunas
+   Loop, % LV_GetCount("Column") 
+      LV_DeleteCol(1)
    Gui Submit, NoHide
+   ; executar a planilha novamente
    GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 }
 /*
@@ -1054,9 +1059,9 @@ Return
 ListViewListener:
 Gui Submit, NoHide
 if(CheckIdiomaPt)
-   GS_GetListView_Click("?hl=pt-br")
+   GS_GetListView_Click("?hl=pt-br",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Else
-   GS_GetListView_Click("?hl=en")
+   GS_GetListView_Click("?hl=en",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
 
 ; LABEL PARA CAPTURAR O CLIQUE NO BOTÃO ATUALIZAR LISTA
