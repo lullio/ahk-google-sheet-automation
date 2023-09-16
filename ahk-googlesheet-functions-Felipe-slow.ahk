@@ -843,12 +843,13 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
    } ; FIM DO LOOP DA LINHA
    
   }
-  for i, val in Categorias
- {
-    msgbox %val%
-    for in, valn in Coluna%val%
-       msgbox %valn%
- }
+;   for i, val in Categorias
+;  {
+;     msgbox %val%
+;     for in, valn in Coluna%val%
+;        msgbox %valn%
+;  }
+ AHK_GetControls()
 } 
 ; }
 
@@ -859,52 +860,28 @@ AHK_GetControls(searchControls := "ComboBox"){
    Gui, Submit, NoHide
    ; PEGAR TEXTOS DA PRIMEIRA E SEGUNDA COLUNA DA LISTVIEW
    WinGet, ActiveControlList, ControlList, A
-   Loop, % LV_GetCount() ; loop through every row
-   {
-      LV_GetText(TextoColuna1, A_Index) ; will get first column by default (Nome do Curso)
-      LV_GetText(TextoColuna2, A_Index, 2) ; will get second column (URL do Curso)
-      ; * CAPTURAR A LINHA SELECIONADA NA LISTVIEW
-      NumeroLinhaSelecionada := LV_GetNext() 
-      ; * Pesquisar por coluna específica
-      getColumnName := GS_GetCSV_Column(, regexFindColumnName,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-      getColumnURL := GS_GetCSV_Column(, regexFindColumnURL,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-
-      posicaoColunaNome := getColumnName.ColumnPosition
-      posicaoColunaURL := getColumnURL.ColumnPosition
-      valueColunaNome := getColumnName.ColumnName
-      valueColunaURL := getColumnURL.ColumnName
-      ; * CAPTURAR VALOR DA COLUNA "NOME"
-      LV_GetText(TextoLVNome, NumeroLinhaSelecionada, posicaoColunaNome) 
-      ; * CAPTURAR VALOR DA COLUNA "URL"
-      LV_GetText(TextoLVURL, NumeroLinhaSelecionada, posicaoColunaURL) 
-      ; msgbox %TextoLVNome% %TextoLVURL%
       /*
       CAPTURANDO TODOS OS CONTROLS DA GUI
       */
-      Loop, Parse, ActiveControlList, `n
+      ; Loop, Parse, ActiveControlList, `n
+      For index, control in StrSplit(ActiveControlList, "`n")
          {
-         
+            
          ControlGetText, TextoDoControl, %A_LoopField%
          FileAppend, %a_index%`t%A_LoopField%`t%TextoDoControl%`n, C:\Controls.txt
             /*
                CAPTURANDO SOMENTES OS ComboBoXES
             */
-            if(InStr(A_LoopField, searchControls)) ; se for um combobox
+            ; if(InStr(A_LoopField, searchControls)) ; se for um combobox
+            if(InStr(control, searchControls)) ; se for um combobox
             {
-               if(TextoDoControl == "GTM1"){
-                  gtm1Folder := "Y:\Season\Analyticsmania\Google Tag Manager Masterclass For Beginners 3.0"
-                  if !FileExist(gtm1Folder)
-                  {
-                  gtm1Folder := "C:\Users\" A_UserName "\Documents\Season\Analyticsmania\Google Tag Manager Masterclass For Beginners 3.0"
-                  }
-                  Run vlc.exe "%gtm1Folder%\PLAYLIST-ADITIONAL-CONTENT.xspf"
-                  Run %gtm1Folder%\PLAYLIST-COMPLETA-BEGGINER.xspf               
-               }else if(TextoDoControl && TextoDoControl = TextoLVNome){
-                  Run, %TextoLVURL%
-               }
+               msgbox %control%
+               GuiControl, Focus, %control%
+               GuiControl,, %control%, |"ok"
+               GuiControlGet, varName, FocusV
+               msgbox %varname%
             }
          }
-   }
 }
 
 /*
