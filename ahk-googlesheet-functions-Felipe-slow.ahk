@@ -96,10 +96,13 @@ gui, font, S11 ;Change font size to 12
 MENU BAR
 */
 Menu, FileMenu, Add, &Abrir Planilha`tCtrl+O, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta Drive`tCtrl+D, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta Script, MenuAbrirLink
+Menu, FileMenu, Add ; with no more options, this is a seperator
+Menu, FileMenu, Add, &Abrir Pasta Automations Drive`tCtrl+D, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Pixels Drive`tCtrl+D, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta do Script, MenuAbrirLink
 
-Menu, EditMenu, Add, Trocar Planilha e/ou Configurações`tCtrl+E, MenuEditarBase
+Menu, EditMenu, Add, Trocar Planilha e suas Configurações`tCtrl+E, MenuEditarBase
+Menu, EditMenu, Add, Colunas e Pesquisas`tCtrl+P, MenuEditarBase
 ; Menu, EditMenu, Add, Trocar Planilha(Aba), MenuEditarBase
 ; Menu, EditMenu, Add, Alterar Formato de Exportação`tCtrl+A, MenuEditarBase
 ; Menu, EditMenu, Add, Alterar Range de Dados`tCtrl+A, MenuEditarBase
@@ -130,10 +133,10 @@ Gui Add, Statusbar, gStatusBarLinks vMyStatusBar,
 /*
    EDITAR TEXTO DA STATUS BAR
 */
-SB_SetParts(200, 200, 100)
+SB_SetParts(150, 150, 400)
 ; SB_SetText("Total de Linhas: ", 1)
 
-SB_SetText("Abrir Planilha", 3)
+SB_SetText("Abrir Planilha", 2)
 Gui Font, S9
 
 ; DEFINIR TODAS AS TABS
@@ -388,6 +391,12 @@ GuiControl, ConfigFile:Choose, PlanilhaTipoExportacao, %PlanilhaTipoExportacao%
 ; Aba da Planilha
 IniRead, PlanilhaNomeId, %iniPath%, planilha, abaPlanilha
 GuiControl, ConfigFile:Text, PlanilhaNomeId, %PlanilhaNomeId%
+; Regex Nome
+IniRead, PlanilhaRegexNome, %iniPath%, planilha, regexNomePlanilha
+GuiControl, ConfigFile:Text, PlanilhaRegexNome, %PlanilhaRegexNome%
+; Regex URL
+IniRead, PlanilhaRegexURL, %iniPath%, planilha, regexURLPlanilha
+GuiControl, ConfigFile:Text, PlanilhaRegexURL, %PlanilhaRegexURL%
 ; Range de Dados
 IniRead, PlanilhaRange, %iniPath%, planilha, rangePlanilha
 GuiControl, ConfigFile:Text, PlanilhaRange, %PlanilhaRange%
@@ -410,13 +419,17 @@ IniWrite, %PlanilhaLink%, %iniPath%, planilha, linkPlanilha
 IniWrite, %PlanilhaTipoExportacao%, %iniPath%, planilha, tipoExportacao
  ; Nome/ID da Aba
 IniWrite, %PlanilhaNomeId%, %iniPath%, planilha, abaPlanilha
+ ; Regex Nome
+IniWrite, %PlanilhaRegexNome%, %iniPath%, planilha, regexNomePlanilha
+ ; Regex URL
+IniWrite, %PlanilhaRegexURL%, %iniPath%, planilha, regexURLPlanilha
  ; Range da Planilha
 IniWrite, %PlanilhaRange%, %iniPath%, planilha, rangePlanilha
  ; Query da Planilha
 IniWrite, %PlanilhaQuery%, %iniPath%, planilha, queryPlanilha
 Notify().AddWindow("Configuração atualizada!`nClique no botão Atualizar para atualizar os dados!",{Time:5000,Icon:177,Background:"0x039018",Title:"SUCESSO",TitleColor:"0xF0F8F1", TitleSize:15, Size:15, Color: "0xF0F8F1"},"","setPosBR")
 ; Gosub, ReadIniFile
-; Run %iniPath%
+Run %iniPath%
 Return
 
 
@@ -665,7 +678,7 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
        TotalLinhas:
          totalLines := LV_GetCount()
          GuiControl, , TotalLinhas, Total de Linhas: %totalLines%
-         SB_SetText("Total de Linhas na Planilha: " totalLines, 1)
+         SB_SetText("Total de Linhas: " totalLines, 1)
        Return {nomesColunas: coco, colunasHeader: [ColunaHeader1, ColunaHeader2, ColunaHeader3, ColunaHeader4, ColunaHeader5, ColunaHeader6, ColunaHeader7, ColunaHeader8, ColunaHeader9, ColunaHeader10, ColunaHeader11, ColunaHeader12, ColunaHeader13], Colunas: Colunas}
 }
 ; GS_GetCSV_ToListView()
@@ -673,6 +686,7 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
 /*
    * FUNÇÃO PARA CAPTURAR AÇÃO AO CLICAR NA LISTVIEW
 */
+; regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*"
 GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId, regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*", action := "openLink"){
    Gui Submit, NoHide
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
@@ -758,10 +772,67 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
 */
 OOk:
 Gui Submit, NoHide
-Gui, Add, Button, vBtnPesquisars x+150 y+150 gPesquisarDados, Pesquisarsssssss
-Gui, Show, AutoSize
+GuiControl,, TabVariable, oidfaf
+; Gui, Add, Text, x10 y50 w120 h100, Novo Campo de Texto:
+; Gui, Add, Edit, x120 y50 w120 h20 vNovoConteudo
+; Gui, Add, Button, x10 y80 w100 h30 , Mostrar Conteúdo
+Gui, Tab, oidfaf
+; Gui, Add, Tab3,, Menu3Sub1|Menu3Sub2|Menu3Sub3
+Gui, font,center S11 cBlue
+; ! TIPOS DE EVENTOS GA4
+; dropdown 1 - principais cursos
+/*
+-----------
+----------- 1ª COLUNA
+-----------
+*/
+Gui Add, Text, section y+15, Tipos de Eventos GA4
+Gui, Add, ComboBox, w200  hwndIdEventos gDocs, 
+
+; ! METRICAS GA3 VS GA4
+; dropdown 1 - principais cursos
+Gui Add, Text,, Comparar Métricas GA3 vs GA4
+Gui, Add, ComboBox, w200  hwndIdMetricas gDocs,
+
+; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
+
+; dropdown 1 - principais cursos
+Gui Add, Text,, GA4 Migration
+Gui, Add, ComboBox, w200  hwndIdMigration gDocs,
+/*
+-----------
+----------- 2ª COLUNA
+-----------
+*/
+; ! RELEASE NOTES
+
+; dropdown 1 - principais cursos
+Gui Add, Text,ys x+10, What's New - Release Notes
+Gui, Add, ComboBox, w200  hwndIdRelease gDocs, 
+
+; ! LIMITS
+
+; dropdown 1 - principais cursos
+Gui Add, Text,, Limits and Price
+Gui, Add, ComboBox, w200  hwndIdLimits gDocs,
+
+; ! ACCOUNT STRUCTURE
+
+; dropdown 1 - principais cursos
+Gui Add, Text,, Account Structure
+Gui, Add, ComboBox, w200  hwndIdAccount , 
+Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+Gui, Add, Checkbox, Checked1  x+15, pt-br?
+; Botões
+gui, font, S11
+gui, Add, Button, xs+20 y+20 w200    Default, &Abrir Doc
+gui, Add, Button, w150 x+20 Cancel , &Cancelar
+
+; Redesenhe a GUI para exibir os novos controles
+Gui, Show, ,w500
 test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
+
 test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
@@ -850,6 +921,7 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
 ;        msgbox %valn%
 ;  }
  AHK_GetControls()
+ Return 
 } 
 ; }
 
@@ -876,10 +948,13 @@ AHK_GetControls(searchControls := "ComboBox"){
             if(InStr(control, searchControls)) ; se for um combobox
             {
                msgbox %control%
+               GuiControlGet, varName1, FocusV
                GuiControl, Focus, %control%
                GuiControl,, %control%, |"ok"
+               ; retornar a variável definida para o control
                GuiControlGet, varName, FocusV
                msgbox %varname%
+               msgbox %varname1%
             }
          }
 }
@@ -901,10 +976,10 @@ GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExporta
          row := [], ++cnt
          loop, parse, y, CSV ; dividir a linha em células
             if (a_index <= 13)																	;or if a_index in 1,4,5
-               row.push(a_loopfield)
+               row.push(a_looptafield)
          LV_add("",row*)
          }
-   SB_SetText("Match(es) da Pesquisa: " cnt,  2)
+   SB_SetText("Match(es) da última Pesquisa: " cnt,  3)
    loop, % lv_getcount("col")
       LV_ModifyCol(a_index,"AutoHdr")
    GuiControl, +Redraw, LVAll
@@ -1039,11 +1114,17 @@ checkSpreadsheetLink(PlanilhaLink){
    * AO SELECIONAR UMA TAB, DEFINIR O BOTÃO PADRÃO
 */
 TabLabel:
+Gui Submit, NoHide
 GuiControlGet, h_Tab,, TabVariable
 ; msgbox % h_Tab
 If (h_Tab="GA4")
    {
+      ; Gui, Destroy
        GuiControl, +Default, VarAbrirDoc1
+       Gui, Add, Text,, &First Name:
+       Gui, Add, Edit
+      ;  GuiControl, 1:Hide, TabVariable
+      ;  GuiControl, 1:Hide, h_tab
    }
    Else If (h_Tab="All")
    {
@@ -1123,14 +1204,14 @@ return
 */
 
 MenuEditarBase:
-   If(InStr(A_ThisMenuItem, "Trocar Planilha e/ou Configurações"))
+   If(InStr(A_ThisMenuItem, "Trocar Planilha e suas Configurações"))
    {
        ; ^n::
   ; MsgBox, Open Menu was clicked
   Gui, ConfigFile:Font, S11
   Gui, ConfigFile:New, +AlwaysOnTop -Resize -MinimizeBox -MaximizeBox, Alterar Configurações da Planilha
   /*
-      * COLUNA 1
+      * COLUNA 1 - linha inteira
   */
   Gui, ConfigFile:Add, Text,center h20 +0x200, Alterar Link da Planilha:
   IniRead, PlanilhaLink, %iniPath%, planilha, linkPlanilha
@@ -1140,11 +1221,18 @@ MenuEditarBase:
   Gui, ConfigFile:Add, Edit, w415 y+5 vPlanilhaNomeId
 
   /*
-      * COLUNA 2
+      * COLUNA 2 - metade
   */
-  Gui, ConfigFile:Add, Text,section center h20 +0x200, Tipo de Exportação:
+  Gui, ConfigFile:Add, Text,section center h20 +0x200, Regex Coluna Nome (Nome/Título)
+  Gui, ConfigFile:Add, Edit, vPlanilhaRegexNome hwndCursosIDAll y+5 w205 ,
+  Gui, ConfigFile:Add, Text,center h20 +0x200, Tipo de Exportação:
   Gui, ConfigFile:Add, ComboBox, vPlanilhaTipoExportacao w100 hwndCursosIDAll y+5 w200 center, CSV||HTML|JSON
-  Gui, ConfigFile:Add, Text, ys x+10 center h20 +0x200, Range de Dados:
+  /*
+      * COLUNA 3 - metade
+  */
+  Gui, ConfigFile:Add, Text,ys x+10  h20 +0x200, Regex Coluna URL/Site (Ação)
+  Gui, ConfigFile:Add, Edit, vPlanilhaRegexURL hwndCursosIDAll y+5 w205 ,
+  Gui, ConfigFile:Add, Text, center h20 +0x200, Range de Dados:
   Gui, ConfigFile:Add, Edit, vPlanilhaRange w205 y+5
   /*
       * FORA DAS COLUNAS
@@ -1156,7 +1244,6 @@ MenuEditarBase:
   gui, font, S13 ;Change font size to 12
   gui, ConfigFile:Add, Button, center y+15 w100 h25 Default gSaveToIniFile, &Salvar
   Gui, ConfigFile:Show, xCenter yCenter
-  ControlFocus, Edit1, Cadastrar Nova Doc - Felipe Lullio
   Gosub, ReadIniFile
    }
    Else If(InStr(A_ThisMenuItem, "trocar planilha(aba)"))
@@ -1170,11 +1257,16 @@ MenuEditarBase:
 Return
 
 MenuAbrirLink:
+Gui Submit, NoHide
 ; MsgBox, %A_ThisMenuItem%
-If(InStr(A_ThisMenuItem, "abrir planilha"))
-   Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit?usp=sharing"
-Else If(InStr(A_ThisMenuItem, "Pasta Drive"))
+If(InStr(A_ThisMenuItem, "Abrir Planilha"))
+{
+   Run, % checkSpreadsheetLink(PlanilhaLink)
+}
+Else If(InStr(A_ThisMenuItem, "Abrir Pasta Pixels"))
    Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1m9rlPqx710icPobioyCU4FrcswwVGsdI?usp=sharing"
+Else If(InStr(A_ThisMenuItem, "Abrir Pasta Automations"))
+   Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1f119V2GprzjM304wedJ9cXNocPro-G8s?usp=sharing"
 Else If(InStr(A_ThisMenuItem, "Pasta Script"))
    Run, %A_ScriptDir%
 
@@ -1216,7 +1308,7 @@ Gui Submit, Nohide
    }Else If(A_GuiEvent == "Normal" && A_EventInfo == 2){
       
    }Else If(A_GuiEvent == "Normal" && A_EventInfo == 3){
-      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit?usp=sharing"
+      Run, % checkSpreadsheetLink(PlanilhaLink)
    }Else If(A_GuiEvent == "Normal" && A_EventInfo == 4){
    }
 Return
