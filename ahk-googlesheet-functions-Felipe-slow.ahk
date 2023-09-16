@@ -865,7 +865,32 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
             ; Coluna%key%%category% =  Coluna%key%%category%
             ; msgbox % Coluna%key%%category%
             Categorias.push(category)
-       
+            GuiControl,, TabVariable, hi
+            Gui, Tab, hi
+            Gui Add, Text, cBlue, %category%
+            /*
+            -----------
+            ----------- 1ª COLUNA
+            -----------
+            */
+            Gui Add, Text, y+15, %category%
+            Gui, Add, ComboBox,y+10 w200 hwndIdEventos gDocs, 
+
+            /*
+            -----------
+            ----------- 2ª COLUNA
+            -----------
+            */
+            ; ! RELEASE NOTES
+
+            ; dropdown 1 - principais cursos
+            Gui Add, Text,y+10, What's New - Release Notes
+            Gui, Add, ComboBox, w200  hwndIdRelease gDocs, 
+            ; Botões
+            gui, font, S11
+            gui, Add, Button, y+20 w200   gAbrirDoc Default, &Abrir Doc
+            gui, Add, Button, w150 y+20 Cancel gCancel, &Cancelar
+            Gui, Show
       Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
       {
          LineNumber := A_Index ; Index da linha
