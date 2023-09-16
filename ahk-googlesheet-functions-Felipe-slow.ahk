@@ -367,7 +367,6 @@ Gui, Add, Checkbox, vCheckPesquisarColuna Checked0 x+10, pesquisar por coluna
 ; gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
 
 Gui, Show, AutoSize , Web Analytics Links Helper - Felipe Lullio
-
 /*
 * AO SELECIONAR UMA TAB FOCAR NO BOTÃO "ABRIR DOC" da tab correspondente 
 */
@@ -407,6 +406,7 @@ GuiControl, ConfigFile:Text, PlanilhaQuery, %PlanilhaQuery%
 ; GS_GetCSV_ToListView()
 PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
 GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
 Return
 /*
    ESCREVER NO ARQUIVO DE CONFIGURAÇÃO
@@ -835,12 +835,20 @@ Return
 
 test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; msgbox % posicaoColunaNome ; variável global
    ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
+   ; remover itens duplicados, aqui são as categorias exibidas na planina , ex: BQ_GA4_Export 
    UniqueColumnCategory := RmvDuplic(ColumnCategory)
+   ; remover o primeiro item do array pois é a primeira linha, que é o termo "Categoria"
+   ; UniqueColumnCategory.RemoveAt(1)
+   ; msgbox % UniqueColumnCategory.MaxIndex()
+   ; Loop, % UniqueColumnCategory.MaxIndex()
+   ;    msgbox % "aqui" UniqueColumnCategory[A_Index]
    ArrTabs := []
    Categorias :=  []
    countComboBoxColuna1 := 0
    countComboBoxColuna2 := 0
+   aspa := """"
    /*
       * DEFINIR QUAIS SERÃO AS TABS DA GUI COM BASE NA COLUNA CATEGORIRAS, PEGANDO SOMENTE O COMEÇO
       * ADICIONAR SOMENTE A PRIMEIRA PARTE DA CATEGORIA QUE TÁ NA PLANILHA, EX: GA4_ GA3_
@@ -886,6 +894,7 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
          ; CONTAR O NÚMERO DE COMBOBOX EXISTENTE NA TAB, SE PASSAR DE 6, CRIAR NOVA COLUNA
          countComboBoxColuna1 := 0
          countComboBoxColuna2 := 0
+         ; PARA CADA CATEGORIA EXISTENTE (BQ_GA4_EXPORT, ....)
          For, key, category in UniqueColumnCategory
             {
                ; msgbox %category%
@@ -901,7 +910,22 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
                If(InStr(category, tabCategory) && countComboBoxColuna1 <=2)
                {
                   Gui Add, Text, y+10, %category%
-                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+                     {
+                        LineNumber := A_Index ; Index da linha
+                        LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+                        if(InStr(LineContent, category))
+                        {
+                           Coluna%category%.push(StrSplit(LineContent, ",")[posicaoColunaNome])
+                           ; LISTA DE NOMES PERTENCENTES A CATEGORIA, VAI SER USADA 
+                           ListaDeNomes .= RegExReplace(StrSplit(LineContent, ",")[posicaoColunaNome] "|", aspa , "")
+                           ; GuiControlGet, var,, % AXID
+                           ; GuiControl,,  "|hello"
+                        }
+                     }
+                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %ListaDeNomes%
+                  ; Resetar a lista de nomes após concluir de preencher um COMBOBOX
+                  ListaDeNomes := ""
                   countComboBoxColuna1++
                   ; msgbox % countComboBoxColuna1
                /*
@@ -909,66 +933,55 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
                */
                }else if(InStr(category, tabCategory) && countComboBoxColuna2 = 0){ ; se passou de 6 combobox na tab
                   Gui, Add, Text, ys+25 x+35, %category%
+                  Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+                     {
+                        LineNumber := A_Index ; Index da linha
+                        LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+                        if(InStr(LineContent, category))
+                        {
+                           Coluna%category%.push(StrSplit(LineContent, ",")[posicaoColunaNome])
+                           ; LISTA DE NOMES PERTENCENTES A CATEGORIA, VAI SER USADA 
+                           ListaDeNomes .= RegExReplace(StrSplit(LineContent, ",")[posicaoColunaNome] "|", aspa , "")
+                           ; GuiControlGet, var,, % AXID
+                           ; GuiControl,,  "|hello"
+                        }
+                     }
                   countComboBoxColuna2++ ; PARA SABER SE JÁ CRIOU UM "YS", se não vai ficar criando colunas
                   Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  ; Resetar a lista de nomes após concluir de preencher um COMBOBOX
+                  ListaDeNomes := ""
                   /*
                      * APÓS TER CRIADO A SEGUNDA COLUNA, NÃO DEVE INSERIR MAIS COLUNAS, INSERIR UM ABAIXO DO OUTRO
                   */
                }else if(InStr(category, tabCategory)){ ; JÁ CRIOU UMA SEGUNDA COLUNA, ENTÃO AGORA DEVE INSERIR OS COMBOBOX UM ABAIXO DO OUTRO
                   Gui, Add, Text, y+10 , %category%
+                  Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+                     {
+                        LineNumber := A_Index ; Index da linha
+                        LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+                        if(InStr(LineContent, category))
+                        {
+                           Coluna%category%.push(StrSplit(LineContent, ",")[posicaoColunaNome])
+                           ; LISTA DE NOMES PERTENCENTES A CATEGORIA, VAI SER USADA 
+                           ListaDeNomes .= RegExReplace(StrSplit(LineContent, ",")[posicaoColunaNome] "|", aspa , "")
+                           ; GuiControlGet, var,, % AXID
+                           ; GuiControl,,  "|hello"
+                        }
+                     }
                   Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  ; Resetar a lista de nomes após concluir de preencher um COMBOBOX
+                  ListaDeNomes := ""                  
                }
-              
-
-               Gui, Show
-         Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
-         {
-            LineNumber := A_Index ; Index da linha
-            LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
-            if(InStr(LineContent, category))
-               Coluna%category%.push(StrSplit(LineContent, ",")[2])
-            ; msgbox % LineContent
-            ; msgbox % UniqueColumnCategory[key]
-            ; msgbox % Coluna%category%[key]
-            ; msgbox % LineContent
-            ; msgbox % StrSplit(LineContent, ",")[2] ; coluna nome
-         Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
-         {
-            ColumnNumber := A_Index ; Index da coluna
-            cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
-            ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
-            ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
-            ; msgbox % LineContent "`n" UniqueColumnCategory[ColumnNumber]
-            ; if(InStr(LineContent, UniqueColumnCategory[ColumnNumber]))
-            ;   msgbox ok
-         /*
-            * Se for a linha 1 e se tiver o termo do regex na linha capture os dados da coluna somente
-         */
-         ; msgbox % cellContent
-         if(RegExMatch(category, cellContent)) ; se for a 1ª linha header e texto for igual a "nome"
-         {
-               ; msgbox %cellContent%
-            sheetData_ColumnName := SubStr(cellContent, 2, -1)
-            category%key%%category%Names.push() 
-            Loop, parse, sheetData_All, `n
-               {
-               /*
-                  SALVAR TODAS AS LINHAS DA COLUNA "Nome"
-               */
-               ; msgbox %A_LoopField% ; aqui exibe a linha inteira (inutil)
-               ; msgbox % StrSplit(A_LoopField,",")[ColumnNumber] ; exibe somente o valor da célula da coluna
-               sheetData_ColumnDataArr.push(StrSplit(A_LoopField,",")[ColumnNumber])
-               sheetData_ColumnDataArrSanitize.push(SubStr(StrSplit(A_LoopField,",")[ColumnNumber], 2, -1))
-               sheetData_ColumnPosition := ColumnNumber
-               sheetData_ColumnDataStr.= StrSplit(A_LoopField,",")[ColumnNumber] ", "
-               sheetData_ColumnDataStrSanitize.= SubStr(StrSplit(A_LoopField,",")[ColumnNumber] ", ", 2, -1)
-               }
-            ; msgbox "Dado da coluna: " %A_LoopField%
-         }
-         } ; FIM DO LOOP DA COLUNA
-      } ; FIM DO LOOP DA LINHA
-      
+   ;   Gui, Show
      }
+     Gui Add, Text, x+15 y+10
+     Gui, Add, Link, y+10 x+10,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+     Gui, Add, Checkbox, Checked1  x+15, pt-br?
+     ; Botões
+     gui, font, S11
+     gui, Add, Button, xs+20 y+20 w200   gAbrirDoc Default, &Abrir Doc
+     gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
+   
    }
 ;   for i, val in Categorias
 ;  {
@@ -976,7 +989,7 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
 ;     for in, valn in Coluna%val%
 ;        msgbox %valn%
 ;  }
- AHK_GetControls()
+;  AHK_GetControls()
  Return 
 } 
 ; }
