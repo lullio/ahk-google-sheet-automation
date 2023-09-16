@@ -140,7 +140,7 @@ SB_SetText("Abrir Planilha", 2)
 Gui Font, S9
 
 ; DEFINIR TODAS AS TABS
-Gui Add, Tab3, vTabVariable gTabLabel, All|GA4|GDS|BigQ|Pixels|GTM
+Gui Add, Tab3, vTabVariable gTabLabel, All ; |GA4|GDS|BigQ|Pixels|GTM
 Gui Font, S10
 
 ; CRIAR A PRIMEIRA TAB
@@ -155,7 +155,7 @@ Gui, Add, ListView, r15 Grid NoSortHdr vLVAll w450 gListViewListener,
 Gui, Add, Edit, h29 vVarPesquisarDados w230 y+10 section, GA4
 Gui, Add, Button, vBtnPesquisar x+10 w100 h30 gPesquisarDados Default, Pesquisar
 Gui, Add, Button, vBtnAtualizar x+10 w100 h30 gAtualizarPlanilha, Atualizar
-Gui, Add, Button, vBtnAtualizar1 x+10 w100 h30 gOOk, Atualizar
+Gui, Add, Button, vBtnAtualizar1 y+5 w100 h30 gOOk, Atualizar
 Gui, Add, Checkbox, vCheckIdiomaPt Checked1 xs y+10 gListenerIdioma, abrir documentação em português
 Gui, Add, Checkbox, vCheckPesquisarColuna Checked0 x+10, pesquisar por coluna
 ; Gui Add, Link, w120 x+10 vTotalLinhas center,
@@ -163,8 +163,8 @@ Gui, Add, Checkbox, vCheckPesquisarColuna Checked0 x+10, pesquisar por coluna
 /*
  * ********* TAB 2
 */
-Gui Tab, GA4
-Gui, font,center S11 cBlue
+; Gui Tab, GA4
+; Gui, font,center S11 cBlue
 ; ! TIPOS DE EVENTOS GA4
 ; dropdown 1 - principais cursos
 /*
@@ -172,199 +172,199 @@ Gui, font,center S11 cBlue
 ----------- 1ª COLUNA
 -----------
 */
-Gui Add, Text, section y+15, Tipos de Eventos GA4
-Gui, Add, ComboBox, w200 vGDocsEventos hwndIdEventos gDocs, 
+; Gui Add, Text, section y+15, Tipos de Eventos GA4
+; Gui, Add, ComboBox, w200 vGDocsEventos hwndIdEventos gDocs, 
 
-; ! METRICAS GA3 VS GA4
-; dropdown 1 - principais cursos
-Gui Add, Text,, Comparar Métricas GA3 vs GA4
-Gui, Add, ComboBox, w200 vGDocsMetricas hwndIdMetricas gDocs,
+; ; ! METRICAS GA3 VS GA4
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Comparar Métricas GA3 vs GA4
+; Gui, Add, ComboBox, w200 vGDocsMetricas hwndIdMetricas gDocs,
 
-; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
+; ; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, GA4 Migration
-Gui, Add, ComboBox, w200 vGDocsMigration hwndIdMigration gDocs,
-/*
------------
------------ 2ª COLUNA
------------
-*/
-; ! RELEASE NOTES
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, GA4 Migration
+; Gui, Add, ComboBox, w200 vGDocsMigration hwndIdMigration gDocs,
+; /*
+; -----------
+; ----------- 2ª COLUNA
+; -----------
+; */
+; ; ! RELEASE NOTES
 
-; dropdown 1 - principais cursos
-Gui Add, Text,ys x+10, What's New - Release Notes
-Gui, Add, ComboBox, w200 vGDocsReleases hwndIdRelease gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,ys x+10, What's New - Release Notes
+; Gui, Add, ComboBox, w200 vGDocsReleases hwndIdRelease gDocs, 
 
-; ! LIMITS
+; ; ! LIMITS
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Limits and Price
-Gui, Add, ComboBox, w200 vGDocsLimits hwndIdLimits gDocs,
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Limits and Price
+; Gui, Add, ComboBox, w200 vGDocsLimits hwndIdLimits gDocs,
 
-; ! ACCOUNT STRUCTURE
+; ; ! ACCOUNT STRUCTURE
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Account Structure
-Gui, Add, ComboBox, w200 vGDocsAccount hwndIdAccount gDocs, 
-Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-Gui, Add, Checkbox, Checked1 VIdioma x+15, pt-br?
-; Botões
-gui, font, S11
-gui, Add, Button, xs+20 y+20 w200  vVarAbrirDoc1 gAbrirDoc Default, &Abrir Doc
-gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Account Structure
+; Gui, Add, ComboBox, w200 vGDocsAccount hwndIdAccount gDocs, 
+; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+; Gui, Add, Checkbox, Checked1 VIdioma x+15, pt-br?
+; ; Botões
+; gui, font, S11
+; gui, Add, Button, xs+20 y+20 w200  vVarAbrirDoc1 gAbrirDoc Default, &Abrir Doc
+; gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
 
-/*
- * ********* TAB 3
-*/
-Gui Tab, GDS
-/*
------------
------------ 1ª COLUNA
------------
-*/
-; ! DOC TEXT GDS
+; /*
+;  * ********* TAB 3
+; */
+; Gui Tab, GDS
+; /*
+; -----------
+; ----------- 1ª COLUNA
+; -----------
+; */
+; ; ! DOC TEXT GDS
 
-; dropdown 1 - principais cursos
-Gui, Font, S11
-Gui Add, Text,y+15 section, Text Functions / Regex
-Gui, Add, ComboBox, w200 vGDSDocsRegex hwndIdRegex gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui, Font, S11
+; Gui Add, Text,y+15 section, Text Functions / Regex
+; Gui, Add, ComboBox, w200 vGDSDocsRegex hwndIdRegex gDocs, 
 
-; ! DOC CONDITIONAL GDS
+; ; ! DOC CONDITIONAL GDS
 
-; dropdown 1 - principais cursos
-Gui Add, Text, , Conditional Functions
-Gui, Add, ComboBox, w200 vGDSDocsConditional hwndIdConditional gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text, , Conditional Functions
+; Gui, Add, ComboBox, w200 vGDSDocsConditional hwndIdConditional gDocs, 
 
-; ! DOC Agregração GDS
+; ; ! DOC Agregração GDS
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Aggregation Functions
-Gui, Add, ComboBox, w200 vGDSDocsAggregation hwndIdAggregation gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Aggregation Functions
+; Gui, Add, ComboBox, w200 vGDSDocsAggregation hwndIdAggregation gDocs, 
 
-; ! DOC Dates GDS
+; ; ! DOC Dates GDS
 
-/*
------------
------------ 2ª COLUNA
------------
-*/
-; dropdown 1 - principais cursos
-Gui Add, Text, ys x+10, Date Functions
-Gui, Add, ComboBox, w200 vGDSDocsDates hwndIdDates gDocs, 
+; /*
+; -----------
+; ----------- 2ª COLUNA
+; -----------
+; */
+; ; dropdown 1 - principais cursos
+; Gui Add, Text, ys x+10, Date Functions
+; Gui, Add, ComboBox, w200 vGDSDocsDates hwndIdDates gDocs, 
 
-; ! DOC CALCULATED FIELDS DOCUMENTATION
+; ; ! DOC CALCULATED FIELDS DOCUMENTATION
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Calculated Fields / Resource Infos
-Gui, Add, ComboBox, w200 vGDSDocsCalculated hwndIdCalculated gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Calculated Fields / Resource Infos
+; Gui, Add, ComboBox, w200 vGDSDocsCalculated hwndIdCalculated gDocs, 
 
-; ! DOC OUTROS DOCS GDS
+; ; ! DOC OUTROS DOCS GDS
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Outras Docs - Blend/Parametros/Etc
-Gui, Add, ComboBox, w200 vGDSDocsOutros hwndIdOutros gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Outras Docs - Blend/Parametros/Etc
+; Gui, Add, ComboBox, w200 vGDSDocsOutros hwndIdOutros gDocs, 
 
-Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-Gui, Add, Checkbox, Checked1 VIdiomaGDS x+15, pt-br?
+; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+; Gui, Add, Checkbox, Checked1 VIdiomaGDS x+15, pt-br?
 
-; Botões
-gui, font, S11
-gui, Add, Button, xs+20 y+20 w200 vVarAbrirDoc2 gAbrirDoc Default, &Abrir Doc
-gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
+; ; Botões
+; gui, font, S11
+; gui, Add, Button, xs+20 y+20 w200 vVarAbrirDoc2 gAbrirDoc Default, &Abrir Doc
+; gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
 
-/*
- * ********* TAB 4
-*/
-Gui Tab, BigQ
-; ! DOC BIG QUERY GA4
+; /*
+;  * ********* TAB 4
+; */
+; Gui Tab, BigQ
+; ; ! DOC BIG QUERY GA4
 
-; dropdown 1 - principais cursos
-Gui, Font, S11
-Gui Add, Text,y+15 section, BigQuery GA4 - Documentações
-Gui, Add, ComboBox, section w200 vBQDoc1 hwndIdBQ1 gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui, Font, S11
+; Gui Add, Text,y+15 section, BigQuery GA4 - Documentações
+; Gui, Add, ComboBox, section w200 vBQDoc1 hwndIdBQ1 gDocs, 
 
-Gui, Add, Link,  y+15,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-Gui, Add, Checkbox, Checked1 VIdiomaBQ x+15, pt-br?
+; Gui, Add, Link,  y+15,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+; Gui, Add, Checkbox, Checked1 VIdiomaBQ x+15, pt-br?
 
-; Botões
-gui, font, S11
-gui, Add, Button, xs+10 y+30 w100  vVarAbrirDoc3 gAbrirDoc Default, &Abrir Doc
-gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
+; ; Botões
+; gui, font, S11
+; gui, Add, Button, xs+10 y+30 w100  vVarAbrirDoc3 gAbrirDoc Default, &Abrir Doc
+; gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
 
-/*
- * ********* TAB 5
-*/
-; obj properties: https://developers.facebook.com/docs/meta-pixel/reference#object-properties
-; custom data parameters: https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/custom-data#
-; for Advantage+ catalog ads: https://www.facebook.com/business/help/606577526529702?id=1205376682832142
-Gui Tab, Pixels
+; /*
+;  * ********* TAB 5
+; */
+; ; obj properties: https://developers.facebook.com/docs/meta-pixel/reference#object-properties
+; ; custom data parameters: https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/custom-data#
+; ; for Advantage+ catalog ads: https://www.facebook.com/business/help/606577526529702?id=1205376682832142
+; Gui Tab, Pixels
 
-; dropdown 1 - principais cursos
-gui, font, S11
-Gui Add, Text,y+15 section, Facebook Pixel
-Gui, Add, ComboBox, w200 vFbDocsPixel hwndIDFbPixel gDocs, 
+; ; dropdown 1 - principais cursos
+; gui, font, S11
+; Gui Add, Text,y+15 section, Facebook Pixel
+; Gui, Add, ComboBox, w200 vFbDocsPixel hwndIDFbPixel gDocs, 
 
-; ! FACEBOOK API
+; ; ! FACEBOOK API
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Facebook API de Conversões
-Gui, Add, ComboBox, w200 vFbDocsAPI hwndIDFbAPi gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Facebook API de Conversões
+; Gui, Add, ComboBox, w200 vFbDocsAPI hwndIDFbAPi gDocs, 
 
-; ! TIK TOK DOCUMENTATION
+; ; ! TIK TOK DOCUMENTATION
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, TikTok Pixel
-Gui, Add, ComboBox, w200 vTikTokDocsPixel hwndIdTikTok gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, TikTok Pixel
+; Gui, Add, ComboBox, w200 vTikTokDocsPixel hwndIdTikTok gDocs, 
 
-; ! KWANKO DOCUMENTATION
+; ; ! KWANKO DOCUMENTATION
 
-; dropdown 1 - principais cursos
-Gui Add, Text, x+10 ys, Kwanko Pixel
-Gui, Add, ComboBox, w200 vKwankoDocs hwndIdKwanko gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text, x+10 ys, Kwanko Pixel
+; Gui, Add, ComboBox, w200 vKwankoDocs hwndIdKwanko gDocs, 
 
-; ! FLOODLIGHT
+; ; ! FLOODLIGHT
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, FloodLight Pixel
-Gui, Add, ComboBox, w200 vFloodLightDocs hwndIdFloodLight gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, FloodLight Pixel
+; Gui, Add, ComboBox, w200 vFloodLightDocs hwndIdFloodLight gDocs, 
 
-; ! Outros Pixels
+; ; ! Outros Pixels
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Outros Pixel
-Gui, Add, ComboBox, w200 vOutrosPixelDocs hwndIdOutrosPixel gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Outros Pixel
+; Gui, Add, ComboBox, w200 vOutrosPixelDocs hwndIdOutrosPixel gDocs, 
 
-Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-Gui, Add, Checkbox, Checked1 VIdiomaPixels x+15, pt-br?
+; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+; Gui, Add, Checkbox, Checked1 VIdiomaPixels x+15, pt-br?
 
-; Botões
-gui, font, S11
-gui, Add, Button, xs+20 y+20 w200 vVarAbrirDoc4 gAbrirDoc Default, &Abrir Doc
-gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
+; ; Botões
+; gui, font, S11
+; gui, Add, Button, xs+20 y+20 w200 vVarAbrirDoc4 gAbrirDoc Default, &Abrir Doc
+; gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
 
-/*
- * ********* TAB 6
-*/
-Gui Tab, GTM
-; ! TIPOS DE EVENTOS GA4
+; /*
+;  * ********* TAB 6
+; */
+; Gui Tab, GTM
+; ; ! TIPOS DE EVENTOS GA4
 
-; dropdown 1 - principais cursos
-Gui Add, Text,y+15, Camada de Dados
-Gui, Add, ComboBox, w300 vGDocsGTMDL hwndIdGTMDL gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,y+15, Camada de Dados
+; Gui, Add, ComboBox, w300 vGDocsGTMDL hwndIdGTMDL gDocs, 
 
-; ! METRICAS GA3 VS GA4
+; ; ! METRICAS GA3 VS GA4
 
-; dropdown 1 - principais cursos
-Gui Add, Text,y+15, Comparar Métricas GA3 vs GA4
-Gui, Add, ComboBox, w300 vGDocsGTMO hwndIdGTMO gDocs, 
-Gui, Add, Link,  xs y+15,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-Gui, Add, Checkbox, Checked1 VIdiomaGTM x+15, pt-br?
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,y+15, Comparar Métricas GA3 vs GA4
+; Gui, Add, ComboBox, w300 vGDocsGTMO hwndIdGTMO gDocs, 
+; Gui, Add, Link,  xs y+15,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+; Gui, Add, Checkbox, Checked1 VIdiomaGTM x+15, pt-br?
 
-; Botões
-gui, font, S11
-gui, Add, Button, xs+10 y+30 w100  vVarAbrirDoc5 gAbrirDoc Default, &Abrir Doc
-gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
+; ; Botões
+; gui, font, S11
+; gui, Add, Button, xs+10 y+30 w100  vVarAbrirDoc5 gAbrirDoc Default, &Abrir Doc
+; gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
 
 Gui, Show, AutoSize , Web Analytics Links Helper - Felipe Lullio
 
@@ -772,64 +772,64 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
 */
 OOk:
 Gui Submit, NoHide
-GuiControl,, TabVariable, oidfaf
+; GuiControl,, TabVariable, oidfaf
 ; Gui, Add, Text, x10 y50 w120 h100, Novo Campo de Texto:
 ; Gui, Add, Edit, x120 y50 w120 h20 vNovoConteudo
 ; Gui, Add, Button, x10 y80 w100 h30 , Mostrar Conteúdo
-Gui, Tab, oidfaf
+; Gui, Tab, oidfaf
 ; Gui, Add, Tab3,, Menu3Sub1|Menu3Sub2|Menu3Sub3
-Gui, font,center S11 cBlue
-; ! TIPOS DE EVENTOS GA4
-; dropdown 1 - principais cursos
-/*
------------
------------ 1ª COLUNA
------------
-*/
-Gui Add, Text, section y+15, Tipos de Eventos GA4
-Gui, Add, ComboBox, w200  hwndIdEventos gDocs, 
+; Gui, font,center S11 cBlue
+; ; ! TIPOS DE EVENTOS GA4
+; ; dropdown 1 - principais cursos
+; /*
+; -----------
+; ----------- 1ª COLUNA
+; -----------
+; */
+; Gui Add, Text, section y+15, Tipos de Eventos GA4
+; Gui, Add, ComboBox, w200  hwndIdEventos gDocs, 
 
-; ! METRICAS GA3 VS GA4
-; dropdown 1 - principais cursos
-Gui Add, Text,, Comparar Métricas GA3 vs GA4
-Gui, Add, ComboBox, w200  hwndIdMetricas gDocs,
+; ; ! METRICAS GA3 VS GA4
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Comparar Métricas GA3 vs GA4
+; Gui, Add, ComboBox, w200  hwndIdMetricas gDocs,
 
-; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
+; ; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, GA4 Migration
-Gui, Add, ComboBox, w200  hwndIdMigration gDocs,
-/*
------------
------------ 2ª COLUNA
------------
-*/
-; ! RELEASE NOTES
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, GA4 Migration
+; Gui, Add, ComboBox, w200  hwndIdMigration gDocs,
+; /*
+; -----------
+; ----------- 2ª COLUNA
+; -----------
+; */
+; ; ! RELEASE NOTES
 
-; dropdown 1 - principais cursos
-Gui Add, Text,ys x+10, What's New - Release Notes
-Gui, Add, ComboBox, w200  hwndIdRelease gDocs, 
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,ys x+10, What's New - Release Notes
+; Gui, Add, ComboBox, w200  hwndIdRelease gDocs, 
 
-; ! LIMITS
+; ; ! LIMITS
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Limits and Price
-Gui, Add, ComboBox, w200  hwndIdLimits gDocs,
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Limits and Price
+; Gui, Add, ComboBox, w200  hwndIdLimits gDocs,
 
-; ! ACCOUNT STRUCTURE
+; ; ! ACCOUNT STRUCTURE
 
-; dropdown 1 - principais cursos
-Gui Add, Text,, Account Structure
-Gui, Add, ComboBox, w200  hwndIdAccount , 
-Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-Gui, Add, Checkbox, Checked1  x+15, pt-br?
-; Botões
-gui, font, S11
-gui, Add, Button, xs+20 y+20 w200    Default, &Abrir Doc
-gui, Add, Button, w150 x+20 Cancel , &Cancelar
+; ; dropdown 1 - principais cursos
+; Gui Add, Text,, Account Structure
+; Gui, Add, ComboBox, w200  hwndIdAccount , 
+; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
+; Gui, Add, Checkbox, Checked1  x+15, pt-br?
+; ; Botões
+; gui, font, S11
+; gui, Add, Button, xs+20 y+20 w200    Default, &Abrir Doc
+; gui, Add, Button, w150 x+20 Cancel , &Cancelar
 
-; Redesenhe a GUI para exibir os novos controles
-Gui, Show, ,w500
+; ; Redesenhe a GUI para exibir os novos controles
+; Gui, Show, ,w500
 test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
 
@@ -837,7 +837,22 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
    UniqueColumnCategory := RmvDuplic(ColumnCategory)
+   ArrTabs := []
    Categorias :=  []
+   countComboBoxColuna1 := 0
+   countComboBoxColuna2 := 0
+   /*
+      * DEFINIR QUAIS SERÃO AS TABS DA GUI COM BASE NA COLUNA CATEGORIRAS, PEGANDO SOMENTE O COMEÇO
+      * ADICIONAR SOMENTE A PRIMEIRA PARTE DA CATEGORIA QUE TÁ NA PLANILHA, EX: GA4_ GA3_
+   */
+   For index, categoria in UniqueColumnCategory
+   {
+      ; VALIDAR PARA ADICIONAR PALAVRAS IGUAIS, ADICIONAR SOMENTE SE O ITEM EXIBIDO FOR DIFERENTE DO ITEM ANTERIOR
+      If(Index != 1 && StrSplit(UniqueColumnCategory[index], "_")[1] != StrSplit(UniqueColumnCategory[index-1], "_")[1])
+      {
+         ArrTabs.push(StrSplit(categoria, "_")[1])
+      }
+   }
    ; Loop % UniqueColumnCategory.MaxIndex()
    ;    msgbox % UniqueColumnCategory[A_Index]
    
@@ -859,86 +874,102 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
 
    ; for key, category in UniqueColumnCategory
    ; {
-      For, key, category in UniqueColumnCategory
-         {
-            Coluna%category% := []
-            ; Coluna%key%%category% =  Coluna%key%%category%
-            ; msgbox % Coluna%key%%category%
-            Categorias.push(category)
-            GuiControl,, TabVariable, hi
-            Gui, Tab, hi
-            Gui Add, Text, cBlue, %category%
-            /*
-            -----------
-            ----------- 1ª COLUNA
-            -----------
-            */
-            Gui Add, Text, y+15, %category%
-            Gui, Add, ComboBox,y+10 w200 hwndIdEventos gDocs, 
-
-            /*
-            -----------
-            ----------- 2ª COLUNA
-            -----------
-            */
-            ; ! RELEASE NOTES
-
-            ; dropdown 1 - principais cursos
-            Gui Add, Text,y+10, What's New - Release Notes
-            Gui, Add, ComboBox, w200  hwndIdRelease gDocs, 
-            ; Botões
-            gui, font, S11
-            gui, Add, Button, y+20 w200   gAbrirDoc Default, &Abrir Doc
-            gui, Add, Button, w150 y+20 Cancel gCancel, &Cancelar
-            Gui, Show
-      Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+      ; CRIAR AS TABS (VAI SER O INICIO DO TEXTO DA CATEGORIA DA PLANILHA)
+      For, index, tabCategory in ArrTabs 
       {
-         LineNumber := A_Index ; Index da linha
-         LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
-         if(InStr(LineContent, category))
-            Coluna%category%.push(StrSplit(LineContent, ",")[2])
-         ; msgbox % LineContent
-         ; msgbox % UniqueColumnCategory[key]
-         ; msgbox % Coluna%category%[key]
-         ; msgbox % LineContent
-         ; msgbox % StrSplit(LineContent, ",")[2] ; coluna nome
-      Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
-      {
-         ColumnNumber := A_Index ; Index da coluna
-         cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
-         ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
-         ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
-         ; msgbox % LineContent "`n" UniqueColumnCategory[ColumnNumber]
-         ; if(InStr(LineContent, UniqueColumnCategory[ColumnNumber]))
-         ;   msgbox ok
-      /*
-         * Se for a linha 1 e se tiver o termo do regex na linha capture os dados da coluna somente
-      */
-      ; msgbox % cellContent
-      if(RegExMatch(category, cellContent)) ; se for a 1ª linha header e texto for igual a "nome"
-      {
-            ; msgbox %cellContent%
-         sheetData_ColumnName := SubStr(cellContent, 2, -1)
-         category%key%%category%Names.push() 
-         Loop, parse, sheetData_All, `n
+         ; CRIAR AS TABS - CÓDIGO TOP
+         GuiControl,, TabVariable, %tabCategory%
+         ; ATIVAR A TAB, OS CÓDIGOS ABAIXO DESSE CÓDIGO SERÃO APLICADOS A TAB SELECIONADA/ATIVADA
+         Gui, Tab, %tabCategory%
+         ; CRIAR UM TEXTO VAZIO PARA ELE SER A COLUNA 1 = A SEÇÃO, O ÚNICO QUE VAI TER O "SECTION" PARA DEFINIR A COLUNA 1
+         Gui Add, Text, section x+15 y+10
+         ; CONTAR O NÚMERO DE COMBOBOX EXISTENTE NA TAB, SE PASSAR DE 6, CRIAR NOVA COLUNA
+         countComboBoxColuna1 := 0
+         countComboBoxColuna2 := 0
+         For, key, category in UniqueColumnCategory
             {
-            /*
-               SALVAR TODAS AS LINHAS DA COLUNA "Nome"
-            */
-            ; msgbox %A_LoopField% ; aqui exibe a linha inteira (inutil)
-            ; msgbox % StrSplit(A_LoopField,",")[ColumnNumber] ; exibe somente o valor da célula da coluna
-            sheetData_ColumnDataArr.push(StrSplit(A_LoopField,",")[ColumnNumber])
-            sheetData_ColumnDataArrSanitize.push(SubStr(StrSplit(A_LoopField,",")[ColumnNumber], 2, -1))
-            sheetData_ColumnPosition := ColumnNumber
-            sheetData_ColumnDataStr.= StrSplit(A_LoopField,",")[ColumnNumber] ", "
-            sheetData_ColumnDataStrSanitize.= SubStr(StrSplit(A_LoopField,",")[ColumnNumber] ", ", 2, -1)
-            }
-         ; msgbox "Dado da coluna: " %A_LoopField%
-      }
-      } ; FIM DO LOOP DA COLUNA
-   } ; FIM DO LOOP DA LINHA
-   
-  }
+               ; msgbox %category%
+               Coluna%category% := []
+               ; ! TIPOS DE EVENTOS GA4
+               ; dropdown 1 - principais cursos
+               /*
+               -----------
+               ----------- 1ª COLUNA
+               -----------
+               */
+               ; somente se a categoria tem o mesmo começo do nome da tab, ex: categoira GA4_Tipos_de_Eventos , tab: GA4
+               If(InStr(category, tabCategory) && countComboBoxColuna1 <=2)
+               {
+                  Gui Add, Text, y+10, %category%
+                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  countComboBoxColuna1++
+                  ; msgbox % countComboBoxColuna1
+               /*
+                  * CRIAR UMA SEGUNDA COLUNA QUANDO PASSAR DE 3 COMBOBOXES/LISTAS
+               */
+               }else if(InStr(category, tabCategory) && countComboBoxColuna2 = 0){ ; se passou de 6 combobox na tab
+                  Gui, Add, Text, ys+25 x+35, %category%
+                  countComboBoxColuna2++ ; PARA SABER SE JÁ CRIOU UM "YS", se não vai ficar criando colunas
+                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  /*
+                     * APÓS TER CRIADO A SEGUNDA COLUNA, NÃO DEVE INSERIR MAIS COLUNAS, INSERIR UM ABAIXO DO OUTRO
+                  */
+               }else if(InStr(category, tabCategory)){ ; JÁ CRIOU UMA SEGUNDA COLUNA, ENTÃO AGORA DEVE INSERIR OS COMBOBOX UM ABAIXO DO OUTRO
+                  Gui, Add, Text, y+10 , %category%
+                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+               }
+              
+
+               Gui, Show
+         Loop, parse, sheetData_All, `n ; PROCESSAR CADA LINHA DA TABELA/PLANILHA
+         {
+            LineNumber := A_Index ; Index da linha
+            LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+            if(InStr(LineContent, category))
+               Coluna%category%.push(StrSplit(LineContent, ",")[2])
+            ; msgbox % LineContent
+            ; msgbox % UniqueColumnCategory[key]
+            ; msgbox % Coluna%category%[key]
+            ; msgbox % LineContent
+            ; msgbox % StrSplit(LineContent, ",")[2] ; coluna nome
+         Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
+         {
+            ColumnNumber := A_Index ; Index da coluna
+            cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
+            ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
+            ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
+            ; msgbox % LineContent "`n" UniqueColumnCategory[ColumnNumber]
+            ; if(InStr(LineContent, UniqueColumnCategory[ColumnNumber]))
+            ;   msgbox ok
+         /*
+            * Se for a linha 1 e se tiver o termo do regex na linha capture os dados da coluna somente
+         */
+         ; msgbox % cellContent
+         if(RegExMatch(category, cellContent)) ; se for a 1ª linha header e texto for igual a "nome"
+         {
+               ; msgbox %cellContent%
+            sheetData_ColumnName := SubStr(cellContent, 2, -1)
+            category%key%%category%Names.push() 
+            Loop, parse, sheetData_All, `n
+               {
+               /*
+                  SALVAR TODAS AS LINHAS DA COLUNA "Nome"
+               */
+               ; msgbox %A_LoopField% ; aqui exibe a linha inteira (inutil)
+               ; msgbox % StrSplit(A_LoopField,",")[ColumnNumber] ; exibe somente o valor da célula da coluna
+               sheetData_ColumnDataArr.push(StrSplit(A_LoopField,",")[ColumnNumber])
+               sheetData_ColumnDataArrSanitize.push(SubStr(StrSplit(A_LoopField,",")[ColumnNumber], 2, -1))
+               sheetData_ColumnPosition := ColumnNumber
+               sheetData_ColumnDataStr.= StrSplit(A_LoopField,",")[ColumnNumber] ", "
+               sheetData_ColumnDataStrSanitize.= SubStr(StrSplit(A_LoopField,",")[ColumnNumber] ", ", 2, -1)
+               }
+            ; msgbox "Dado da coluna: " %A_LoopField%
+         }
+         } ; FIM DO LOOP DA COLUNA
+      } ; FIM DO LOOP DA LINHA
+      
+     }
+   }
 ;   for i, val in Categorias
 ;  {
 ;     msgbox %val%
@@ -992,6 +1023,7 @@ GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExporta
    cnt := 0
    Gui Submit, NoHide
    planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   ; msgbox % planilha
    GuiControl, -Redraw, LVAll
    LV_Delete()
    for x,y in strsplit(planilha,"`n","`r")
@@ -1001,7 +1033,7 @@ GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExporta
          row := [], ++cnt
          loop, parse, y, CSV ; dividir a linha em células
             if (a_index <= 13)																	;or if a_index in 1,4,5
-               row.push(a_looptafield)
+               row.push(a_loopfield)
          LV_add("",row*)
          }
    SB_SetText("Match(es) da última Pesquisa: " cnt,  3)
@@ -1038,6 +1070,9 @@ GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExpo
    ; SE A PESQUISA DE COLUNA RETORNAR NADA (0) - ATUALIZAR A PLANILHA
    If(LV_GetCount() = 0){
       GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+      ; Sleep, 500
+      ; Notify().AddWindow("Erro",{Time:3000,Icon:28,Background:"0x990000",Title:"ERRO",TitleSize:15, Size:15, Color: "0xCDA089", TitleColor: "0xE1B9A4"},"w330 h30","setPosBR")
+      MsgBox, 4112 , Erro!, A Pesquisa não retornou nada`nVamos recarregar a planilha!, 2
    }
    GuiControl, +Redraw, LVAll
    i++
@@ -1146,8 +1181,8 @@ If (h_Tab="GA4")
    {
       ; Gui, Destroy
        GuiControl, +Default, VarAbrirDoc1
-       Gui, Add, Text,, &First Name:
-       Gui, Add, Edit
+      ;  Gui, Add, Text,, &First Name:
+      ;  Gui, Add, Edit
       ;  GuiControl, 1:Hide, TabVariable
       ;  GuiControl, 1:Hide, h_tab
    }
@@ -1329,12 +1364,9 @@ Gui Submit, Nohide
    ; recarregar página
    If(A_GuiEvent == "Normal" && A_EventInfo == 1){
    ; trazer página para frente
-      
    }Else If(A_GuiEvent == "Normal" && A_EventInfo == 2){
-      
-   }Else If(A_GuiEvent == "Normal" && A_EventInfo == 3){
       Run, % checkSpreadsheetLink(PlanilhaLink)
-   }Else If(A_GuiEvent == "Normal" && A_EventInfo == 4){
+   }Else If(A_GuiEvent == "Normal" && A_EventInfo == 3){
    }
 Return
 
