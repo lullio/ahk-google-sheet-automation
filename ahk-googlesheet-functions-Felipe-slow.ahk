@@ -6,7 +6,6 @@ DICAS:
 
 */
 #Include, <Default_Settings>
-
 full_command_line := DllCall("GetCommandLine", "str")
 if not (A_IsAdmin or RegExMatch(full_command_line, " /restart(?!\S)"))
    {
@@ -24,14 +23,7 @@ Menu, Tray, Icon, C:\Windows\system32\imageres.dll,312 ;Set custom Script icon
 
 DLLPath=C:\Users\%A_UserName%\Documents\Github\AHK\secondary-scripts\ahk-styles\styles\USkin.dll ;Location to the USkin.dll file
 StylesPath=C:\Users\%A_UserName%\Documents\Github\AHK\secondary-scripts\ahk-styles\styles ;location where you saved the .msstyles files
-
-; melhores dark: cosmo, lakrits
-; melhores light: MacLion3, Milikymac, Panther, Milk, Luminous, fanta, invoice
 SkinForm(DLLPath,Apply, StylesPath "\MacLion3.msstyles") ; cosmo. msstyles
-
-; Gosub, Gui
-; SkinForm(DLLPath,"0", StylesPath . CurrentStyle)
-
 SkinForm(DLLPath,Param1 = "Apply", SkinName = ""){
   if(Param1 = Apply){
     DllCall("LoadLibrary", str, DLLPath)
@@ -40,27 +32,8 @@ SkinForm(DLLPath,Param1 = "Apply", SkinName = ""){
     DllCall(DLLPath . "\USkinExit")
   }
 }
-
 /*
-   *VARIÁVEIS PARA FORMAR A URL DO GOOGLE SHEET*
-   - Somente a sheetURL_key é obrigatória
-     
-   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq=" sheetURL_SQLQueryEncoded
-   msgbox % fullSheetURL 
-*/
-
-sheetURL_key := "1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34" ; id da pasta de trabalho/arquivo
-sheetURL_name := "All-Docs" ; nome ou id da aba / guia / planilha
-sheetURL_format := "csv" ; csv, html ou json
-sheetURL_range := "" ; A1:C99
-sheetURL_SQLQueryGA4Doc := "select * where D matches '^GA4.*' AND D is not null"
-sheetURL_SQLQuery := "select * where A matches '.*' AND A is not null"
-sheetURL_SQLQueryEncoded = % GS_EncodeDecodeURI(sheetURL_SQLQuery)
-global i:=1 ; contas quantas vezes clicou no botão (botão Pesquisar)
-global Colunas := [] ; salvar os nomes das colunas pela function GS_GetCSV_ToListView()
-/*
-* ; VARIÁVEIS INI (ARQUIVO DE CONFIGURAÇÃO)
-
+   * ; VARIÁVEIS INI (ARQUIVO DE CONFIGURAÇÃO)
 */
 if((A_PtrSize=8&&A_IsCompiled="")||!A_IsUnicode){ ;32 bit=4  ;64 bit=8
    SplitPath,A_AhkPath,,dir
@@ -78,16 +51,6 @@ else
   appdata := A_AppData "\" regexreplace(A_ScriptName, "\.\w+"), isWin10 := true
 iniPath = %appdata%\settings.ini
 ; Run, %iniPath%
-
-; msgbox % capture_sheetURL_key1 ; 1 serve para retornar o 1º capturing group(o que está entre parênteses )
-; msgbox % capture_sheetURL_name1 ; 1 serve para retornar o 1º capturing group(o que está entre parênteses )
-
-/*
-   * CRIAR A GUI
-   * CONTROLS
-   *
-   *
-*/
 
 Gui, Destroy
 Gui,+AlwaysOnTop ; +Owner
@@ -131,21 +94,19 @@ Gui, Menu, MyMenuBar ; Attach MyMenuBar to the GUI
 Gui Font, S9
 Gui Add, Statusbar, gStatusBarLinks vMyStatusBar,
 /*
-   EDITAR TEXTO DA STATUS BAR
+   * EDITAR TEXTO DA STATUS BAR
 */
 SB_SetParts(150, 150, 400)
-; SB_SetText("Total de Linhas: ", 1)
-
 SB_SetText("Abrir Planilha", 2)
 Gui Font, S9
 
-; DEFINIR TODAS AS TABS
+/*
+   * DEFINIR TODAS AS TABS
+*/
 Gui Add, Tab3, vTabVariable gTabLabel, All ; |GA4|GDS|BigQ|Pixels|GTM
 Gui Font, S10
-
 ; CRIAR A PRIMEIRA TAB
 Gui Tab, All 
-Gui, font, S10
 
 /*
  * ********* TAB 1
@@ -155,229 +116,34 @@ Gui, Add, ListView, r15 Grid NoSortHdr vLVAll w450 gListViewListener,
 Gui, Add, Edit, h29 vVarPesquisarDados w230 y+10 section, GA4
 Gui, Add, Button, vBtnPesquisar x+10 w100 h30 gPesquisarDados Default, Pesquisar
 Gui, Add, Button, vBtnAtualizar x+10 w100 h30 gAtualizarPlanilha, Atualizar
-Gui, Add, Button, vBtnAtualizar1 y+5 w100 h30 gOOk, Atualizar
-Gui, Add, Checkbox, vCheckIdiomaPt Checked1 xs y+10 gListenerIdioma, abrir documentação em português
+Gui, Add, Button, vBtnAtualizar1 y+5 w100 h30 gGerarTabsListas, Gerar Tabs
+Gui, Add, Checkbox, vCheckIdiomaPt Checked1 xs y+10, abrir documentação em português
 Gui, Add, Checkbox, vCheckPesquisarColuna Checked0 x+10, pesquisar por coluna
-; Gui Add, Link, w120 x+10 vTotalLinhas center,
-
 /*
- * ********* TAB 2
+   O RESTO DAS TABS É GERADO DINÂMICAMENTE COM BASE NOS DADOS DA PLANILHA
 */
-; Gui Tab, GA4
-; Gui, font,center S11 cBlue
-; ! TIPOS DE EVENTOS GA4
-; dropdown 1 - principais cursos
-/*
------------
------------ 1ª COLUNA
------------
-*/
-; Gui Add, Text, section y+15, Tipos de Eventos GA4
-; Gui, Add, ComboBox, w200 vGDocsEventos hwndIdEventos gDocs, 
-
-; ; ! METRICAS GA3 VS GA4
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Comparar Métricas GA3 vs GA4
-; Gui, Add, ComboBox, w200 vGDocsMetricas hwndIdMetricas gDocs,
-
-; ; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, GA4 Migration
-; Gui, Add, ComboBox, w200 vGDocsMigration hwndIdMigration gDocs,
-; /*
-; -----------
-; ----------- 2ª COLUNA
-; -----------
-; */
-; ; ! RELEASE NOTES
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,ys x+10, What's New - Release Notes
-; Gui, Add, ComboBox, w200 vGDocsReleases hwndIdRelease gDocs, 
-
-; ; ! LIMITS
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Limits and Price
-; Gui, Add, ComboBox, w200 vGDocsLimits hwndIdLimits gDocs,
-
-; ; ! ACCOUNT STRUCTURE
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Account Structure
-; Gui, Add, ComboBox, w200 vGDocsAccount hwndIdAccount gDocs, 
-; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-; Gui, Add, Checkbox, Checked1 VIdioma x+15, pt-br?
-; ; Botões
-; gui, font, S11
-; gui, Add, Button, xs+20 y+20 w200  vVarAbrirDoc1 gAbrirDoc Default, &Abrir Doc
-; gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
-
-; /*
-;  * ********* TAB 3
-; */
-; Gui Tab, GDS
-; /*
-; -----------
-; ----------- 1ª COLUNA
-; -----------
-; */
-; ; ! DOC TEXT GDS
-
-; ; dropdown 1 - principais cursos
-; Gui, Font, S11
-; Gui Add, Text,y+15 section, Text Functions / Regex
-; Gui, Add, ComboBox, w200 vGDSDocsRegex hwndIdRegex gDocs, 
-
-; ; ! DOC CONDITIONAL GDS
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text, , Conditional Functions
-; Gui, Add, ComboBox, w200 vGDSDocsConditional hwndIdConditional gDocs, 
-
-; ; ! DOC Agregração GDS
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Aggregation Functions
-; Gui, Add, ComboBox, w200 vGDSDocsAggregation hwndIdAggregation gDocs, 
-
-; ; ! DOC Dates GDS
-
-; /*
-; -----------
-; ----------- 2ª COLUNA
-; -----------
-; */
-; ; dropdown 1 - principais cursos
-; Gui Add, Text, ys x+10, Date Functions
-; Gui, Add, ComboBox, w200 vGDSDocsDates hwndIdDates gDocs, 
-
-; ; ! DOC CALCULATED FIELDS DOCUMENTATION
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Calculated Fields / Resource Infos
-; Gui, Add, ComboBox, w200 vGDSDocsCalculated hwndIdCalculated gDocs, 
-
-; ; ! DOC OUTROS DOCS GDS
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Outras Docs - Blend/Parametros/Etc
-; Gui, Add, ComboBox, w200 vGDSDocsOutros hwndIdOutros gDocs, 
-
-; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-; Gui, Add, Checkbox, Checked1 VIdiomaGDS x+15, pt-br?
-
-; ; Botões
-; gui, font, S11
-; gui, Add, Button, xs+20 y+20 w200 vVarAbrirDoc2 gAbrirDoc Default, &Abrir Doc
-; gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
-
-; /*
-;  * ********* TAB 4
-; */
-; Gui Tab, BigQ
-; ; ! DOC BIG QUERY GA4
-
-; ; dropdown 1 - principais cursos
-; Gui, Font, S11
-; Gui Add, Text,y+15 section, BigQuery GA4 - Documentações
-; Gui, Add, ComboBox, section w200 vBQDoc1 hwndIdBQ1 gDocs, 
-
-; Gui, Add, Link,  y+15,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-; Gui, Add, Checkbox, Checked1 VIdiomaBQ x+15, pt-br?
-
-; ; Botões
-; gui, font, S11
-; gui, Add, Button, xs+10 y+30 w100  vVarAbrirDoc3 gAbrirDoc Default, &Abrir Doc
-; gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
-
-; /*
-;  * ********* TAB 5
-; */
-; ; obj properties: https://developers.facebook.com/docs/meta-pixel/reference#object-properties
-; ; custom data parameters: https://developers.facebook.com/docs/marketing-api/conversions-api/parameters/custom-data#
-; ; for Advantage+ catalog ads: https://www.facebook.com/business/help/606577526529702?id=1205376682832142
-; Gui Tab, Pixels
-
-; ; dropdown 1 - principais cursos
-; gui, font, S11
-; Gui Add, Text,y+15 section, Facebook Pixel
-; Gui, Add, ComboBox, w200 vFbDocsPixel hwndIDFbPixel gDocs, 
-
-; ; ! FACEBOOK API
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Facebook API de Conversões
-; Gui, Add, ComboBox, w200 vFbDocsAPI hwndIDFbAPi gDocs, 
-
-; ; ! TIK TOK DOCUMENTATION
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, TikTok Pixel
-; Gui, Add, ComboBox, w200 vTikTokDocsPixel hwndIdTikTok gDocs, 
-
-; ; ! KWANKO DOCUMENTATION
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text, x+10 ys, Kwanko Pixel
-; Gui, Add, ComboBox, w200 vKwankoDocs hwndIdKwanko gDocs, 
-
-; ; ! FLOODLIGHT
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, FloodLight Pixel
-; Gui, Add, ComboBox, w200 vFloodLightDocs hwndIdFloodLight gDocs, 
-
-; ; ! Outros Pixels
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Outros Pixel
-; Gui, Add, ComboBox, w200 vOutrosPixelDocs hwndIdOutrosPixel gDocs, 
-
-; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-; Gui, Add, Checkbox, Checked1 VIdiomaPixels x+15, pt-br?
-
-; ; Botões
-; gui, font, S11
-; gui, Add, Button, xs+20 y+20 w200 vVarAbrirDoc4 gAbrirDoc Default, &Abrir Doc
-; gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
-
-; /*
-;  * ********* TAB 6
-; */
-; Gui Tab, GTM
-; ; ! TIPOS DE EVENTOS GA4
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,y+15, Camada de Dados
-; Gui, Add, ComboBox, w300 vGDocsGTMDL hwndIdGTMDL gDocs, 
-
-; ; ! METRICAS GA3 VS GA4
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,y+15, Comparar Métricas GA3 vs GA4
-; Gui, Add, ComboBox, w300 vGDocsGTMO hwndIdGTMO gDocs, 
-; Gui, Add, Link,  xs y+15,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-; Gui, Add, Checkbox, Checked1 VIdiomaGTM x+15, pt-br?
-
-; ; Botões
-; gui, font, S11
-; gui, Add, Button, xs+10 y+30 w100  vVarAbrirDoc5 gAbrirDoc Default, &Abrir Doc
-; gui, Add, Button, w75 x+10 Cancel gCancel, &Cancelar
-
 Gui, Show, AutoSize , Web Analytics Links Helper - Felipe Lullio
+GuiControl, +Default, BtnPesquisar ; Definir o botão Pesquisar como Padrão
+ControlFocus, Edit1, Web Analytics Links ; Dar foco no input Edit de Pesquisa
+; Gui, ListView, LVAll
 /*
-* AO SELECIONAR UMA TAB FOCAR NO BOTÃO "ABRIR DOC" da tab correspondente 
+   *VARIÁVEIS PARA FORMAR A URL DO GOOGLE SHEET*
+   - Somente a sheetURL_key é obrigatória
+     
+   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq=" sheetURL_SQLQueryEncoded
+   msgbox % fullSheetURL 
 */
-; BOTÃO PADRÃO
-GuiControl, +Default, BtnPesquisar
-; FOCAR NO EDIT CONTROL DE PESQUISA
-ControlFocus, Edit1, Web Analytics Links
-
-Gui, ListView, LVAll
+; sheetURL_key := "1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34" ; id da pasta de trabalho/arquivo
+; sheetURL_name := "All-Docs" ; nome ou id da aba / guia / planilha
+; sheetURL_format := "csv" ; csv, html ou json
+; sheetURL_range := "" ; A1:C99
+; sheetURL_SQLQueryGA4Doc := "select * where D matches '^GA4.*' AND D is not null"
+; sheetURL_SQLQuery := "select * where A matches '.*' AND A is not null"
+; sheetURL_SQLQueryEncoded = % GS_EncodeDecodeURI(sheetURL_SQLQuery)
+; global i:=1 ; contas quantas vezes clicou no botão (botão Pesquisar)
+; global Colunas := [] ; salvar os nomes das colunas pela function GS_GetCSV_ToListView()
 /*
-   LER ARQUIVO DE CONFIGURAÇÃO
+   * LER ARQUIVO DE CONFIGURAÇÃO
 */
 ReadIniFile:
 Gui Submit, NoHide
@@ -402,14 +168,16 @@ GuiControl, ConfigFile:Text, PlanilhaRange, %PlanilhaRange%
 ; Query
 IniRead, PlanilhaQuery, %iniPath%, planilha, queryPlanilha
 GuiControl, ConfigFile:Text, PlanilhaQuery, %PlanilhaQuery%
-; msgbox %PlanilhaTipoExportacao%
-; GS_GetCSV_ToListView()
-PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+
+global PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
 GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+; Run %iniFile%
 Return
 /*
-   ESCREVER NO ARQUIVO DE CONFIGURAÇÃO
+   * ESCREVER NO ARQUIVO DE CONFIGURAÇÃO
 */
 SaveToIniFile:
 Gui Submit
@@ -428,27 +196,14 @@ IniWrite, %PlanilhaRange%, %iniPath%, planilha, rangePlanilha
  ; Query da Planilha
 IniWrite, %PlanilhaQuery%, %iniPath%, planilha, queryPlanilha
 Notify().AddWindow("Configuração atualizada!`nClique no botão Atualizar para atualizar os dados!",{Time:5000,Icon:177,Background:"0x039018",Title:"SUCESSO",TitleColor:"0xF0F8F1", TitleSize:15, Size:15, Color: "0xF0F8F1"},"","setPosBR")
-; Gosub, ReadIniFile
-Run %iniPath%
+global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+; Run %iniFile%
 Return
 
-
-/*
-   VARIÁVEIS QUE CONTÉM OS VALORES DAS COLUNAS DA PRIMEIRA LINHA
-*/
-global ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
-global UniqueColumnCategory := RmvDuplic(ColumnCategory)
-; Msgbox % ColumnCategory.arrColumnSanitize[5]
-/*
-TRATAMENTO DO MENU BAR
-*/
-MenuHandler:
-; MsgBox, %A_ThisMenuItem%
-return
-
-Docs:
-Return
-/* TRATAMENTO DOS DROPDOWN, PARA QUANDO VC ESCREVER O NOME DO CURSO JÁ PREENCHER O CURSO AUTOMATICAMENTE NO DROPDOWN
+/* 
+   * FUNÇÃO PARA O TRATAMENTO DOS DROPDOWN, PARA QUANDO VC ESCREVER O NOME DO CURSO JÁ PREENCHER O CURSO AUTOMATICAMENTE NO DROPDOWN
 */
 ; RESOLVI CRIAR UMA FUNÇÃO PARA NÃO TER QUE DUPLICAR ESSE CÓDIGO VÁRIAS VEZES PARA OS DROPDOWNS
 DropDownComplete(DocID)
@@ -472,14 +227,6 @@ DropDownComplete(DocID)
   }
   ; GuiControl,Focus,Curso
 }
-
-
-; GoSub, controlVideos
-; Ignorar o erro que o ahk dá e continuar executando o script
-
-
-
-
 
 /*
    *FUNÇÃO PARA DECODIFICAR A QUERY QUE VAI NA URL*
@@ -594,8 +341,6 @@ GS_GetCSV_Column(JS_VariableName:="arr", regexFindColumn := "i).*", PlanilhaLink
        Return {variavelJavascript: sheetData_ColumnDataStrJS, arrColumn: sheetData_ColumnDataArr, arrColumnSanitize: sheetData_ColumnDataArrSanitize, strColumn: sheetData_ColumnDataStr, strColumnSanitize: sheetData_ColumnDataStrSanitize, ColumnPosition: sheetData_ColumnPosition, ColumnName: sheetData_ColumnName}
 }
 
-
-
 /*
    * FUNÇÃO PARA EXIBIR OS DADOS NA LISTVIEW
 */
@@ -681,12 +426,10 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
          SB_SetText("Total de Linhas: " totalLines, 1)
        Return {nomesColunas: coco, colunasHeader: [ColunaHeader1, ColunaHeader2, ColunaHeader3, ColunaHeader4, ColunaHeader5, ColunaHeader6, ColunaHeader7, ColunaHeader8, ColunaHeader9, ColunaHeader10, ColunaHeader11, ColunaHeader12, ColunaHeader13], Colunas: Colunas}
 }
-; GS_GetCSV_ToListView()
 
 /*
    * FUNÇÃO PARA CAPTURAR AÇÃO AO CLICAR NA LISTVIEW
 */
-; regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*"
 GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId, regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*", action := "openLink"){
    Gui Submit, NoHide
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
@@ -767,73 +510,16 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
    }
 }
 
-/*
-   * FUNÇÃO PARA CRIAR AS CATEGORIAS
-*/
-OOk:
+; LABEL PARA GERAR AS TABS E COMBOBOX
+GerarTabsListas:
 Gui Submit, NoHide
-; GuiControl,, TabVariable, oidfaf
-; Gui, Add, Text, x10 y50 w120 h100, Novo Campo de Texto:
-; Gui, Add, Edit, x120 y50 w120 h20 vNovoConteudo
-; Gui, Add, Button, x10 y80 w100 h30 , Mostrar Conteúdo
-; Gui, Tab, oidfaf
-; Gui, Add, Tab3,, Menu3Sub1|Menu3Sub2|Menu3Sub3
-; Gui, font,center S11 cBlue
-; ; ! TIPOS DE EVENTOS GA4
-; ; dropdown 1 - principais cursos
-; /*
-; -----------
-; ----------- 1ª COLUNA
-; -----------
-; */
-; Gui Add, Text, section y+15, Tipos de Eventos GA4
-; Gui, Add, ComboBox, w200  hwndIdEventos gDocs, 
-
-; ; ! METRICAS GA3 VS GA4
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Comparar Métricas GA3 vs GA4
-; Gui, Add, ComboBox, w200  hwndIdMetricas gDocs,
-
-; ; !!!!!! MIGRAÇÃO DO GA3 PARA GA4 - COMPATIBILIDADE
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, GA4 Migration
-; Gui, Add, ComboBox, w200  hwndIdMigration gDocs,
-; /*
-; -----------
-; ----------- 2ª COLUNA
-; -----------
-; */
-; ; ! RELEASE NOTES
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,ys x+10, What's New - Release Notes
-; Gui, Add, ComboBox, w200  hwndIdRelease gDocs, 
-
-; ; ! LIMITS
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Limits and Price
-; Gui, Add, ComboBox, w200  hwndIdLimits gDocs,
-
-; ; ! ACCOUNT STRUCTURE
-
-; ; dropdown 1 - principais cursos
-; Gui Add, Text,, Account Structure
-; Gui, Add, ComboBox, w200  hwndIdAccount , 
-; Gui, Add, Link, xs+90 y+20,<a>Root-Doc</a> | <a>What's New</a> | <a>Blog</a> | <a>Notion</a>
-; Gui, Add, Checkbox, Checked1  x+15, pt-br?
-; ; Botões
-; gui, font, S11
-; gui, Add, Button, xs+20 y+20 w200    Default, &Abrir Doc
-; gui, Add, Button, w150 x+20 Cancel , &Cancelar
-
-; ; Redesenhe a GUI para exibir os novos controles
-; Gui, Show, ,w500
-test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
-
-test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
+/*
+   * FUNÇÃO PARA CRIAR TODAS AS TABS E LISTAS COMBOBOX DE FORMA DINÂMICA
+   * ESTOU CAPTURANDO A POSIÇÃO DA COLUNA "URL" E POSIÇÃO DA COLUNA "NOME", LÁ EM CIMA, COMO VARIÁVEL GLOBAL
+*/
+GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    ; msgbox % posicaoColunaNome ; variável global
    ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
@@ -843,7 +529,6 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
    ; UniqueColumnCategory.RemoveAt(1)
    ; msgbox % UniqueColumnCategory.MaxIndex()
    ; Loop, % UniqueColumnCategory.MaxIndex()
-   ;    msgbox % "aqui" UniqueColumnCategory[A_Index]
    ArrTabs := []
    Categorias :=  []
    countComboBoxColuna1 := 0
@@ -864,11 +549,11 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
    ; Loop % UniqueColumnCategory.MaxIndex()
    ;    msgbox % UniqueColumnCategory[A_Index]
    
-; Loop, % Colunas.MaxIndex()
-; {
-;    Coluna%A_Index%%Colunas[A_Index]% = "asd"
-;    msgbox % Coluna%A_Index%%Colunas[A_Index]%
-; }
+   ; Loop, % Colunas.MaxIndex()
+   ; {
+   ;    Coluna%A_Index%%Colunas[A_Index]% = "asd"
+   ;    msgbox % Coluna%A_Index%%Colunas[A_Index]%
+   ; }
 
    sheetData_All := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId) ; Select * limit 1
    sheetData_ColumnDataArr := []
@@ -947,7 +632,7 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
                         }
                      }
                   countComboBoxColuna2++ ; PARA SABER SE JÁ CRIOU UM "YS", se não vai ficar criando colunas
-                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %ListaDeNomes%
                   ; Resetar a lista de nomes após concluir de preencher um COMBOBOX
                   ListaDeNomes := ""
                   /*
@@ -968,7 +653,7 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
                            ; GuiControl,,  "|hello"
                         }
                      }
-                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %category%
+                  Gui, Add, ComboBox, w200 hwndIdEventos gDocs, %ListaDeNomes%
                   ; Resetar a lista de nomes após concluir de preencher um COMBOBOX
                   ListaDeNomes := ""                  
                }
@@ -983,21 +668,23 @@ test(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, Planilh
      gui, Add, Button, w150 x+20 Cancel gCancel, &Cancelar
    
    }
-;   for i, val in Categorias
-;  {
-;     msgbox %val%
-;     for in, valn in Coluna%val%
-;        msgbox %valn%
-;  }
-;  AHK_GetControls()
+   ;   for i, val in Categorias
+   ;  {
+   ;     msgbox %val%
+   ;     for in, valn in Coluna%val%
+   ;        msgbox %valn%
+   ;  }
+   ;  AHK_GetControls()
  Return 
 } 
-; }
 
 /*
-   * FUNÇÃO PARA CAPTURAR OS COMBOBOX, CAPTURAR TODOS CONTROLS AHK
+   * FUNÇÃO PARA CAPTURAR TODOS OS CONTROLS DA GUI
+   * * CAPTURAR SOMENTE OS COMBOBOX COM "IF STATEMENT"
+   * * LOOP 1: Loop em todos controls ahk
+   * * * LOOP 2: Se for um combobox rodar um Loop de todas as linhas da planilha e comparar com o texto que está no combobox
 */
-AHK_GetControls(searchControls := "ComboBox"){
+AHK_GetControls(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId,searchControls := "ComboBox"){
    Gui, Submit, NoHide
    ; PEGAR TEXTOS DA PRIMEIRA E SEGUNDA COLUNA DA LISTVIEW
    WinGet, ActiveControlList, ControlList, A
@@ -1008,22 +695,26 @@ AHK_GetControls(searchControls := "ComboBox"){
       For index, control in StrSplit(ActiveControlList, "`n")
          {
             
-         ControlGetText, TextoDoControl, %A_LoopField%
-         FileAppend, %a_index%`t%A_LoopField%`t%TextoDoControl%`n, C:\Controls.txt
+            ControlGetText, TextoDoControl, %A_LoopField%
+            FileAppend, %a_index%`t%A_LoopField%`t%TextoDoControl%`n, C:\Controls.txt
+            ; DAR UM FOCO NO CONTROL PARA DEPOIS PEGAR O TEXTO DELE/VARIÁVEL
+            GuiControl, Focus, %control%
+            ; Retrieves the name of the focused control's associated variable.
+            GuiControlGet,varName, FocusV
             /*
                CAPTURANDO SOMENTES OS ComboBoXES
-            */
-            ; if(InStr(A_LoopField, searchControls)) ; se for um combobox
+            */               
             if(InStr(control, searchControls)) ; se for um combobox
             {
-               msgbox %control%
-               GuiControlGet, varName1, FocusV
-               GuiControl, Focus, %control%
-               GuiControl,, %control%, |"ok"
-               ; retornar a variável definida para o control
-               GuiControlGet, varName, FocusV
-               msgbox %varname%
-               msgbox %varname1%
+               for index,row in strsplit(planilha,"`n","`r")
+                  if (varName != "" && InStr(row, trim(varName)))
+                     {
+                        msgbox % varName
+                        msgbox % row
+                        msgbox % InStr(row, varName)
+                        varName := ""
+                     }
+               ; msgbox %control%
             }
          }
 }
@@ -1119,9 +810,6 @@ RmvDuplic(object) {
    }
    Return secondobject
 }
-/*
-   * FUNÇÃO PARA TRATAR O IDIOMA DA DOCUMENTAÇÃO
-*/
 
 /*
    * FUNÇÃO PARA CHECAR A URL DA PLANILHA SELECIONADA NO COMBOBOX DA GUI "ALTERAR CONFIGURAÇÕES"
@@ -1176,21 +864,27 @@ checkSpreadsheetLink(PlanilhaLink){
       Return linkPlanilha
 }
 
-
 /*
-   *
-   *
-   *
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
+   * ************************************ ************************************ ***********************************
    * LABELS
 */
 /*
    * AO SELECIONAR UMA TAB, DEFINIR O BOTÃO PADRÃO
 */
 TabLabel:
-Gui Submit, NoHide
-GuiControlGet, h_Tab,, TabVariable
-; msgbox % h_Tab
-If (h_Tab="GA4")
+   Gui Submit, NoHide
+   GuiControlGet, h_Tab,, TabVariable
+   If (h_Tab="GA4")
    {
       ; Gui, Destroy
        GuiControl, +Default, VarAbrirDoc1
@@ -1220,9 +914,9 @@ If (h_Tab="GA4")
        GuiControl, +Default, VarAbrirDoc5
    }
 Return
-AbrirDoc:
-Return
-
+/*
+   * RECUPERAR OS DADOS DA PLANILHA
+*/
 RecuperarPlanilha:
    Gui Submit, NoHide
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
@@ -1230,52 +924,65 @@ RecuperarPlanilha:
    ; msgbox % capture_sheetURL_key1
    RegExMatch(PlanilhaLink, "#gid=(.+)", capture_sheetURL_name)
    ; msgbox % capture_sheetURL_name1
-   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "/gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq=" GS_EncodeDecodeURI(sheetURL_SQLQuery)
+   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" sheetURL_key "/gviz/tq?tqx=out:" sheetURL_format "&range=" sheetURL_range "&sheet=" sheetURL_name "&tq="     GS_EncodeDecodeURI(sheetURL_SQLQuery)
    ; msgbox %PlanilhaTipoExportacao% %PlanilhaLink% %PlanilhaNomeId% %PlanilhaRange% %PlanilhaQuery%
    sheetData_All := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
-/*
 
+/*
+   * VALIDAR O LINK DA PLANILHA, CONVERTER A OPÇÃO SELECIONADA PARA URL
 */
 ValidarLink:
 Gui Submit, NoHide
 checkSpreadsheetLink(PlanilhaLink)
 Return
 
-AbrirCurso:
-Gui, Submit, NoHide
-AHK_GetControls()
+/*
+   * AO CLICAR NO BOTÃO ABRIR DOC DAS TABS
+*/
+AbrirDoc:
+   Gui, Submit, NoHide
+   AHK_GetControls(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
-
+/*
+   * AO SELECIONAR UM ITEM NA LISTVIEW VAI CHAMAR A FUNÇÃO DE CLICAR E ANTES VAI TRATAR O IDIOMA ESCOLHIDO , CHECKBOX IDIOMA
+*/
 ListViewListener:
-Gui Submit, NoHide
-if(CheckIdiomaPt)
-   GS_GetListView_Click("?hl=pt-br",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-Else
-   GS_GetListView_Click("?hl=en",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   Gui Submit, NoHide
+   if(CheckIdiomaPt)
+      GS_GetListView_Click("?hl=pt-br",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   Else
+      GS_GetListView_Click("?hl=en",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
-
-; LABEL PARA CAPTURAR O CLIQUE NO BOTÃO ATUALIZAR LISTA
+/*
+   * AO CLICAR NO BOTÃO "ATUALIZAR", VAI EXCLUIR A LISTVIEW E CRIAR NOVAMENTE
+*/
 AtualizarPlanilha:
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
+/*
+   * CASO O CHECKBOX DE "PESQUISAR POR COLUNA" ESTEJA MARCADO
+*/
+PesquisarDados:
+   Gui Submit, NoHide
+   If(CheckPesquisarColuna = true){ ; se o checkbox estiver marcado
+      GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   }else{
+      GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   }
+Return
 
 /*
-* LABELS DO MENU BAR
-***
+   * LABELS DO MENU BAR
 */
 
 MenuAcoesApp:
-If(InStr(A_ThisMenuItem, "Sair"))
-   ExitApp
-Else If(InStr(A_ThisMenuItem, "Reiniciar"))
-   Reload
+   If(InStr(A_ThisMenuItem, "Sair"))
+      ExitApp
+   Else If(InStr(A_ThisMenuItem, "Reiniciar"))
+      Reload
 return
-/*
-
-*/
-
 MenuEditarBase:
    If(InStr(A_ThisMenuItem, "Trocar Planilha e suas Configurações"))
    {
@@ -1328,47 +1035,37 @@ MenuEditarBase:
    Else If(InStr(A_ThisMenuItem, "query"))
       Run x
 Return
-
 MenuAbrirLink:
-Gui Submit, NoHide
-; MsgBox, %A_ThisMenuItem%
-If(InStr(A_ThisMenuItem, "Abrir Planilha"))
-{
-   Run, % checkSpreadsheetLink(PlanilhaLink)
-}
-Else If(InStr(A_ThisMenuItem, "Abrir Pasta Pixels"))
-   Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1m9rlPqx710icPobioyCU4FrcswwVGsdI?usp=sharing"
-Else If(InStr(A_ThisMenuItem, "Abrir Pasta Automations"))
-   Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1f119V2GprzjM304wedJ9cXNocPro-G8s?usp=sharing"
-Else If(InStr(A_ThisMenuItem, "Pasta Script"))
-   Run, %A_ScriptDir%
+   Gui Submit, NoHide
+   ; MsgBox, %A_ThisMenuItem%
+   If(InStr(A_ThisMenuItem, "Abrir Planilha"))
+   {
+      Run, % checkSpreadsheetLink(PlanilhaLink)
+   }
+   Else If(InStr(A_ThisMenuItem, "Abrir Pasta Pixels"))
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1m9rlPqx710icPobioyCU4FrcswwVGsdI?usp=sharing"
+   Else If(InStr(A_ThisMenuItem, "Abrir Pasta Automations"))
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1f119V2GprzjM304wedJ9cXNocPro-G8s?usp=sharing"
+   Else If(InStr(A_ThisMenuItem, "Pasta Script"))
+      Run, %A_ScriptDir%
 
-If(InStr(A_ThisMenuItem, "cursos udemy"))
-   Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://www.udemy.com/home/my-courses/lists/"
-Else If(InStr(A_ThisMenuItem, "Desenvolvedor"))
-   Run, https://lullio.com.br
-Else If(InStr(A_ThisMenuItem, "Sobre o programa"))
-{
-   Run, https://projetos.lullio.com.br/control-video-study
-   Run, https://github.com/lullio/ahk-chrome-control-videos
-}
-Else If(InStr(A_ThisMenuItem, "WhatsApp"))
-   Run, https://wa.me/5511991486309
+   If(InStr(A_ThisMenuItem, "cursos udemy"))
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://www.udemy.com/home/my-courses/lists/"
+   Else If(InStr(A_ThisMenuItem, "Desenvolvedor"))
+      Run, https://lullio.com.br
+   Else If(InStr(A_ThisMenuItem, "Sobre o programa"))
+   {
+      Run, https://projetos.lullio.com.br/control-video-study
+      Run, https://github.com/lullio/ahk-chrome-control-videos
+   }
+   Else If(InStr(A_ThisMenuItem, "WhatsApp"))
+      Run, https://wa.me/5511991486309
 return
-
 /*
---------------------------
---------------------------
-*/
-/*
-TRATAMENTO DA STATUS BAR
-*/
-
-/*
-   AO CLICAR EM UMA POSIÇÃO DA STATUSBAR
+   * STATUS BAR, TRATAR STATUSBAR
 */
 StatusBarLinks:
-Gui Submit, Nohide
+   Gui Submit, Nohide
    ; msgbox %MyStatusBar%
    ; msgbox %A_EventInfo%
    ; if(A_GuiEvent == "Normal"){
@@ -1382,21 +1079,11 @@ Gui Submit, Nohide
    }Else If(A_GuiEvent == "Normal" && A_EventInfo == 3){
    }
 Return
+; ListenerIdioma:
+; if(CheckIdiomaPt = 1)
+;  idioma := "?hl=pt-br"
+; Else If (CheckIdiomaPt = 0)
+;  idioma := "?hl=en"
 
-PesquisarDados:
-Gui Submit, NoHide
-If(CheckPesquisarColuna = true){ ; se o checkbox estiver marcado
-   GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-}else{
-   GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-}
-Return
-
-ListenerIdioma:
-if(CheckIdiomaPt = 1)
- idioma := "?hl=pt-br"
-Else If (CheckIdiomaPt = 0)
- idioma := "?hl=en"
-
-Return
+; Return
 
