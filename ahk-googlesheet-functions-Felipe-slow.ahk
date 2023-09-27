@@ -116,7 +116,7 @@ Gui Tab, All
  * ********* TAB 1
 */
 ; se quiser que apareça nome do grupo tirar o -Hdr
-Gui, Add, ListView, r15 Grid NoSortHdr vLVAll w450 gListViewListener,
+Gui, Add, ListView, r15 Grid NoSortHdr vLVAll w460 gListViewListener,
 Gui, Add, Edit, h29 vVarPesquisarDados w230 y+10 section, GA4
 Gui, Add, Button, vBtnPesquisar x+10 w100 h30 gPesquisarDados Default, Pesquisar
 Gui, Add, Button, vBtnAtualizar x+10 w100 h30 gAtualizarPlanilha, Atualizar
@@ -131,9 +131,12 @@ Gui, Add, Checkbox, vCheckIdiomaPt Checked1 xs y+5 center, abrir documentação 
 /*
    O RESTO DAS TABS É GERADO DINÂMICAMENTE COM BASE NOS DADOS DA PLANILHA
 */
+GoSub, ReadIniFile
 Gui, Show, AutoSize , Web Analytics Links Helper - Felipe Lullio
 GuiControl, +Default, BtnPesquisar ; Definir o botão Pesquisar como Padrão
 ControlFocus, Edit1, Web Analytics Links ; Dar foco no input Edit de Pesquisa
+; GoSub, ReadIniFile ; aqui mostra os dados sendo carregados na gui
+Return
 
 ; Gui, ListView, LVAll
 /*
@@ -157,7 +160,7 @@ ControlFocus, Edit1, Web Analytics Links ; Dar foco no input Edit de Pesquisa
 */
 ReadIniFile:
 Gui Submit, NoHide
-global PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+; global PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
 ; If(!PlanilhaLink)
 ;    msgbox hi
 ; Link da Planilha
@@ -181,12 +184,15 @@ GuiControl, ConfigFile:Text, PlanilhaRange, %PlanilhaRange%
 ; Query
 IniRead, PlanilhaQuery, %iniPath%, planilha, queryPlanilha
 GuiControl, ConfigFile:Text, PlanilhaQuery, %PlanilhaQuery%
+; msgbox % PlanilhaLink PlanilhaQuery PlanilhaTipoExportacao PlanilhaRange PlanilhaNomeId
+PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+; msgbox %PlanilhaLink%
 If(PlanilhaLink)
 {
    GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-   global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
-   global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
-   global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   ; global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+   ; global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+   ; global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
    ; Run %iniFile%
 }
 Return
@@ -195,6 +201,11 @@ Return
 */
 SaveToIniFile:
 Gui Submit
+If(!FileExist(iniPath))
+   {
+      FileCreateDir, %appdata% ; criar a pasta 
+      FileAppend, "" ,iniPath ; criar o arquivo caso ñ exista
+   }
  ; Link da Planilha
 IniWrite, %PlanilhaLink%, %iniPath%, planilha, linkPlanilha
  ; Tipo de Exportação
@@ -210,10 +221,10 @@ IniWrite, %PlanilhaRange%, %iniPath%, planilha, rangePlanilha
  ; Query da Planilha
 IniWrite, %PlanilhaQuery%, %iniPath%, planilha, queryPlanilha
 Notify().AddWindow("Configuração atualizada!`nClique no botão Atualizar para atualizar os dados!",{Time:5000,Icon:177,Background:"0x039018",Title:"SUCESSO",TitleColor:"0xF0F8F1", TitleSize:15, Size:15, Color: "0xF0F8F1"},"","setPosBR")
-global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
-global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
-global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-checkSpreadsheetLink(PlanilhaLink)
+; global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+; global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+; global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+; checkSpreadsheetLink(PlanilhaLink)
 ; Run %iniFile%
 Return
 
@@ -273,21 +284,31 @@ GS_EncodeDecodeURI(str, encode := true, component := true) {
 */
 GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    Gui Submit, NoHide
-   PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; msgbox %PlanilhaTipoExportacao%
+   ; msgbox % PlanilhaLink PlanilhaQuery PlanilhaTipoExportacao PlanilhaRange PlanilhaNomeId
+   ; msgbox % PlanilhaLink
+   ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    /*
       * capturar o nome da planilha pela gui/arquivo de configuração .ini
       * se o valor "abaPlanilha" estiver vazio no arquivo de configuração, capturar o nome da planilha pela URL da planilha.
    */
+   ; msgbox %PlanilhaNomeId%
+   ; msgbox %capture_sheetURL_name1%
    RegExMatch(PlanilhaLink, "\/d\/(.+)\/", capture_sheetURL_key)
+   ; msgbox %capture_sheetURL_key1%
    RegExMatch(PlanilhaLink, "#gid=(.+)", capture_sheetURL_name)
    If(PlanilhaNomeId)
       capture_sheetURL_name := PlanilhaNomeId
    Else
       capture_sheetURL_name := capture_sheetURL_name1
    ; msgbox % capture_sheetURL_name
+   ; msgbox % capture_sheetURL_name
    ; msgbox % capture_sheetURL_key1
    ; msgbox % capture_sheetURL_name1
-   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
+   ; fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
+   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&gid=" capture_sheetURL_name "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
+   ; msgbox % fullSheetURL
+   ; CLIPboard := fullSheetURL
 
    whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
    whr.Open("GET",fullSheetURL, true)
@@ -361,14 +382,16 @@ GS_GetCSV_Column(JS_VariableName:="arr", regexFindColumn := "i).*", PlanilhaLink
 */
 GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    Gui Submit, NoHide
-   PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; msgbox % PlanilhaLink PlanilhaQuery PlanilhaTipoExportacao PlanilhaRange PlanilhaNomeId
+   ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    RegExMatch(PlanilhaLink, "\/d\/(.+)\/", capture_sheetURL_key)
    ; msgbox % capture_sheetURL_key1
    RegExMatch(PlanilhaLink, "#gid=(.+)", capture_sheetURL_name)
    ; msgbox % capture_sheetURL_name1
-   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name1 "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
+   ; fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name1 "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
    ; msgbox %PlanilhaTipoExportacao% %PlanilhaLink% %PlanilhaNomeId% %PlanilhaRange% %PlanilhaQuery%
-   sheetData_All := GS_GetCSV(capture_sheetURL_key1, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, capture_sheetURL_name1)
+   
+   sheetData_All := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, capture_sheetURL_name1)
    
    ; msgbox % sheetData_All
       
@@ -431,7 +454,8 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
        } ; FIM DO LOOP DA LINHA
 
        LV_ModifyCol(1, "30 Right") 
-       LV_ModifyCol(2, "250 Left") 
+       LV_ModifyCol(2) 
+       LV_ModifyCol(2, "left") 
        LV_ModifyCol(3, "200 Left") 
        
        ; total de linhas
@@ -454,16 +478,23 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
    ; * Pesquisar por coluna específica
    getColumnName := GS_GetCSV_Column(, regexFindColumnName,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
    getColumnURL := GS_GetCSV_Column(, regexFindColumnURL, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   ; msgbox % getColumnName.arrColumn[2]
 
    posicaoColunaNome := getColumnName.ColumnPosition
    posicaoColunaURL := getColumnURL.ColumnPosition
+   ; msgbox % posicaoColunaURL
    valueColunaNome := getColumnName.ColumnName
    valueColunaURL := getColumnURL.ColumnName
    ; * CAPTURAR VALOR DA COLUNA "NOME"
    LV_GetText(TextoLVNome, NumeroLinhaSelecionada, posicaoColunaNome) 
    ; * CAPTURAR VALOR DA COLUNA "URL"
    LV_GetText(TextoLVURL, NumeroLinhaSelecionada, posicaoColunaURL) 
-   ; msgbox %TextoLVNome% %TextoLVURL%
+   
+   ; * SOLUÇÃO PARA NÃO DEPENDER DA COLUNA URL QUE ESTÁ NA GUI, PEGAR DIRETO DA PLANILHA(array que foi salvo)
+   If(!TextoLVURL)
+      TextoLVURL := getColumnURL.arrColumnSanitize[NumeroLinhaSelecionada+1]
+   ; msgbox % TextoLVURL
+   ; msgbox % getColumnURL.arrColumnSanitize[NumeroLinhaSelecionada+1]
 
    ; msgbox % A_GuiEvent
    if(A_GuiEvent == "DoubleClick" && action = "openLink"){ ; abrir link normal
@@ -541,6 +572,7 @@ Return
 */
 GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
    ; msgbox % posicaoColunaNome ; variável global
+   ; msgbox % PlanilhaLink PlanilhaQuery PlanilhaTipoExportacao PlanilhaRange PlanilhaNomeId
    sheetData_All := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId) ; Select * limit 1
    ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    ColumnCategory := GS_GetCSV_Column(, "i)Categoria",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).arrColumnSanitize ; ColumnData.variavelJavascript ColumnData.arrColumn ColumnData.strColumn
@@ -563,9 +595,10 @@ GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaR
    For index, categoria in UniqueColumnCategory
    {
       ; VALIDAR PARA ADICIONAR PALAVRAS IGUAIS, ADICIONAR SOMENTE SE O ITEM EXIBIDO FOR DIFERENTE DO ITEM ANTERIOR
-      If(Index != 1 && StrSplit(UniqueColumnCategory[index], "_")[1] != StrSplit(UniqueColumnCategory[index-1], "_")[1])
+      If(Index != 1 && StrSplit(UniqueColumnCategory[index], "_")[1] != StrSplit(UniqueColumnCategory[index-1], "_")[1] && StrSplit(UniqueColumnCategory[index], "_")[1] != "")
       {
          ArrTabs.push(StrSplit(categoria, "_")[1])
+         ; MSGBOX % StrSplit(categoria, "_")[1]
       }
    }
    ; Loop % UniqueColumnCategory.MaxIndex()
@@ -593,6 +626,7 @@ GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaR
       For, index, tabCategory in ArrTabs 
       {
          ; CRIAR AS TABS - CÓDIGO TOP
+         ; msgbox % tabCategory
          GuiControl,, TabVariable, %tabCategory%
          ; ATIVAR A TAB, OS CÓDIGOS ABAIXO DESSE CÓDIGO SERÃO APLICADOS A TAB SELECIONADA/ATIVADA
          Gui, Tab, %tabCategory%
@@ -849,21 +883,21 @@ GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExpo
    * FUNÇÃO PARA ATUALIZAR PLANILHA, RESET NA PLANILHA
 */
 GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId){
-   PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
-   RegExMatch(PlanilhaLink, "\/d\/(.+)\/", capture_sheetURL_key)
-   ; msgbox % capture_sheetURL_key1
-   RegExMatch(PlanilhaLink, "#gid=(.+)", capture_sheetURL_name)
-   ; msgbox % capture_sheetURL_name1
-   fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name1 "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
+   ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; RegExMatch(PlanilhaLink, "\/d\/(.+)\/", capture_sheetURL_key)
+   ; ; msgbox % capture_sheetURL_key1
+   ; RegExMatch(PlanilhaLink, "#gid=(.+)", capture_sheetURL_name)
+   ; ; msgbox % capture_sheetURL_name1
+   ; fullSheetURL = % "https://docs.google.com/spreadsheets/d/" capture_sheetURL_key1 "/gviz/tq?tqx=out:" PlanilhaTipoExportacao "&range=" PlanilhaRange "&sheet=" capture_sheetURL_name1 "&tq=" GS_EncodeDecodeURI(PlanilhaQuery)
    ; msgbox %PlanilhaTipoExportacao% %PlanilhaLink% %PlanilhaNomeId% %PlanilhaRange% %PlanilhaQuery%
-   sheetData_All := GS_GetCSV(capture_sheetURL_key1, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, capture_sheetURL_name1)
-   PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; sheetData_All := GS_GetCSV(capture_sheetURL_key1, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, capture_sheetURL_name1)
+   ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    LV_Delete() ; deletar todas as linhas
    ; deletar todas as colunas
    Loop, % LV_GetCount("Column") 
       LV_DeleteCol(1)
    ; executar a planilha novamente
-   GS_GetCSV_ToListView(capture_sheetURL_key1, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, capture_sheetURL_name1)
+   GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 }
 /*
    * FUNÇÃO PARA REMOVER DADOS DUPLICADOS DE UM ARRAY
@@ -893,31 +927,33 @@ checkSpreadsheetLink(PlanilhaLink){
 
    ; atualizar a url do google sheet TEMPLATE 1
       if(PlanilhaLink = "Documentações Analytics")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043"
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=0"
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Banco de Dados")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ZmlzAhTGDPCsAz9yHAQGHEGPFdLDh1sCE6D7ePHNLjM/edit?usp=sharing"        
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Programação")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043"        
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1TkfWTjHWunj6A13X_cMydXX_UEant4sgMKfqr13mjiU/edit?usp=sharing"        
       else if(PlanilhaLink = "Cursos")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1_flbbi427JI7NiIk4ZGZvAM9eRBM4dd_gTDFgw3Npo8/edit#gid=0"
       else if(PlanilhaLink = "Relatórios")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043"
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=0"
       else if(PlanilhaLink = "Documentações GAPS")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=218001466"
       else if(PlanilhaLink = "Outros")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043"
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=0"
       ; TRATAR PELA URL DA PLANILHA
       Else If(RegExMatch(PlanilhaLink, "i).*docs.google.com/.+\/d\/.+\/"))
          Return linkPlanilha := PlanilhaLink
       Else If(!InStr(PlanilhaLink, "https://docs.google.com/spreadsheets") || RegexMatch(PlanilhaLink, "\s{0,}"))
       {
-         ; MsgBox, 4112 , Erro na URL do Site!, URL Inválida`n- Copie e Cole uma URL do Google Sheets válida!
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043"
+         ; msgbox hi
+         MsgBox, 4112 , Erro na URL do Site!, URL Inválida`n- Copie e Cole uma URL do Google Sheets válida!
+         ; Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=1280466043"
          ; GoSub, MenuEditarBase
          ; Resetar/Limpar o valor do ComboBox
-         ; GuiControl,ConfigFile:Choose, PlanilhaLink, 1
+         GuiControl,ConfigFile:Choose, PlanilhaLink, 1
+         Return
       }
       Return linkPlanilha
 }
@@ -1020,6 +1056,7 @@ Return
 */
 AtualizarPlanilha:
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; msgbox % PlanilhaLink PlanilhaQuery PlanilhaTipoExportacao PlanilhaRange PlanilhaNomeId
    GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
 /*
@@ -1079,12 +1116,12 @@ MenuEditarBase:
       * FORA DAS COLUNAS
   */
   Gui, ConfigFile:Font, S9
-  Gui, ConfigFile:Add, Text, xs y+10 center h20 +0x200, Query: 
+  Gui, ConfigFile:Add, Text, xs y+10 center h20 +0x200, Query: (Avançado)
   Gui, ConfigFile:Add, Edit, vPlanilhaQuery w420 y+5 r2,
   Gui, ConfigFile:Font, S10
 
-  gui, font, S13 ;Change font size to 12
-  gui, ConfigFile:Add, Button, center y+15 w100 h25 Default gSaveToIniFile, &Salvar
+  gui, font, S12 ;Change font size to 12
+  gui, ConfigFile:Add, Button, center y+15 w150 h30 Default gSaveToIniFile, &Salvar
   Gui, ConfigFile:Show, xCenter yCenter
   If(PlanilhaLink){
      Gosub, ReadIniFile
@@ -1126,7 +1163,7 @@ MenuAbrirLink:
    Else If(InStr(A_ThisMenuItem, "Sobre o programa"))
    {
       Run, https://projetos.lullio.com.br/control-video-study
-      Run, https://github.com/lullio/ahk-chrome-control-videos
+      Run, https://github.com/lullio/ahk-getData-googleSheet
    }
    Else If(InStr(A_ThisMenuItem, "WhatsApp"))
       Run, https://wa.me/5511991486309
