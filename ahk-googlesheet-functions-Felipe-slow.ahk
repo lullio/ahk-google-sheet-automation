@@ -60,7 +60,7 @@ MENU BAR
 */
 Menu, FileMenu, Add, &Abrir Planilha Atual`tCtrl+O, MenuAbrirLink
 Menu, FileMenu, Add ; with no more options, this is a seperator
-Menu, FileMenu, Add, &Abrir Pasta Automations Drive`tCtrl+A, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Automations Drive`tCtrl+W, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Pasta Documentações Template Drive`tCtrl+D, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Pasta Documentações Oficiais Drive, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Pasta Pixels Drive`tCtrl+P, MenuAbrirLink
@@ -116,8 +116,10 @@ Gui Tab, All
  * ********* TAB 1
 */
 ; se quiser que apareça nome do grupo tirar o -Hdr
-Gui, Add, ListView, r15 Grid NoSortHdr vLVAll w460 gListViewListener,
-Gui, Add, Edit, h29 vVarPesquisarDados w230 y+10 section, GA4
+Gui, Add, ListView,  r15 Grid NoSortHdr vLVAll w460 gListViewListener ,
+Gui Font, S12 
+Gui, Add, Edit, h29 vVarPesquisarDados w230 y+10 section cblue, .*ecommerce.*
+Gui Font, S10, 
 Gui, Add, Button, vBtnPesquisar x+10 w100 h30 gPesquisarDados Default, Pesquisar
 Gui, Add, Button, vBtnAtualizar x+10 w100 h30 gAtualizarPlanilha, Atualizar
 ; Gui, Add, Button, vBtnAtualizar1 y+5 w100 h30 gGerarTabsListas, Gerar Tabs
@@ -454,9 +456,11 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
        } ; FIM DO LOOP DA LINHA
 
        LV_ModifyCol(1, "30 Right") 
+       LV_ModifyCol(2, "left") 
        LV_ModifyCol(2) 
        LV_ModifyCol(2, "left") 
        LV_ModifyCol(3, "200 Left") 
+       LV_ModifyCol(4, "70 Left") 
        
        ; total de linhas
        TotalLinhas:
@@ -497,7 +501,7 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
    ; msgbox % getColumnURL.arrColumnSanitize[NumeroLinhaSelecionada+1]
 
    ; msgbox % A_GuiEvent
-   if(A_GuiEvent == "DoubleClick" && action = "openLink"){ ; abrir link normal
+   if(A_GuiEvent = "DoubleClick" && action = "openLink"){ ; abrir link normal
       /*
          * ABRIR OS LINKS/URLS/DOCUMENTAÇÕES NO NAVEGADOR
          ! IMPORTANTE: Caso tenha mais de um link na coluna, transformar em um array e fazer um loop para abrir os links
@@ -506,53 +510,84 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
       ; msgbox % URLSanitized
       For Index, URL in StrSplit(URLSanitized, " | ")
          {
+            If(InStr(URL, "https://www.notion.so/"))
+            {
+               URLNotion := StrReplace(URL, "https://", "notion://")
+                     ; getColumnName := GS_GetCSV_Column(, "i).*(notion|anotacoes|anotacao|notes|note|anotações|anotação).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+               if(A_UserName == "Felipe" || A_UserName == "estudos" || A_UserName == "Estudos")
+                  {
+                  user := A_UserName
+                  pass := "xrlo1010"
+                  }
+               Else
+                  {
+                  user := "felipe.lullio@hotmail.com"
+                  pass := "XrLO1000@1010"
+                  }
+               RunAs, %user%, %pass%
+               ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
+               Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe URLNotion, , Hide
+               RunAs
+               WinActivate, Notion
+            }
+            Else
               Run, %URL%
-         } 
-   }else if(A_GuiEvent == "DoubleClick" && action = "openAHKChrome"){ ; abrir ahk chrome
-      ; URL := RegExReplace(TextoLVURL, "%idiomapt%", "")
-      ; if !(PageInst := Chrome.GetPageByURL(URL, "contains"))
+         }
+         Return 
+   }else if(A_GuiEvent = "R"){ ; CLIQUE COM BOTÃO DIREITO DO MOUSE
+   ; * Pesquisar por coluna específica
+   getColumnCode := GS_GetCSV_Column(, "i).*(code|codigo|código|source-code|source).*", PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   ; msgbox % getColumnName.arrColumn[2]
+
+   posicaoColunaCode := getColumnCode.ColumnPosition
+   valueColunaCode := getColumnCode.ColumnName
+   ; URLCode := getColumnCode.arrColumnSanitize[NumeroLinhaSelecionada+1]
+    ; * CAPTURAR VALOR DA COLUNA "URL"
+    LV_GetText(URLCode, NumeroLinhaSelecionada, posicaoColunaCode) 
+    
+    ; * SOLUÇÃO PARA NÃO DEPENDER DA COLUNA URL QUE ESTÁ NA GUI, PEGAR DIRETO DA PLANILHA(array que foi salvo)
+    If(!URLCode)
+      URLCode := getColumnCode.arrColumnSanitize[NumeroLinhaSelecionada+1]
+    ; msgbox % TextoLVURL
+    ; msgbox % getColumnURL.arrColumnSanitize[NumeroLinhaSelecionada+1]
+   ; msgbox %URLCode%
+   If(URLCode)
+   {
+      ; UrlDownloadToFile, %URLCode%, arquivo.txt
+      whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+      whr.Open("GET", URLCode, true)
+      whr.Send()
+      ; Using 'true' above and the call below allows the script to remain responsive.
+      whr.WaitForResponse()
+      code := whr.ResponseText
+      ; MsgBox % code
+      Clipboard := code
+      MsgBox, 4160 , SUCESSO!, Código copiado para a área de transferência, 2
+
+      ; * EXIBIR CODIGO NA TELA, FUNÇÕES ESTÃO NO FINAL DO ARQUIVO
+      ; displayNum := 0
+      ; visibleState := true
+      pasteToScreen()
+   }
+      ; /*
+      ;    ABRIR NOTION
+      ; */
+      ; ; getColumnName := GS_GetCSV_Column(, "i).*(notion|anotacoes|anotacao|notes|note|anotações|anotação).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+      ; if(A_UserName == "Felipe" || A_UserName == "estudos" || A_UserName == "Estudos")
       ;    {
-      ;       ChromeInst := new Chrome(profileName,URL,"--remote-debugging-port=9222 --remote-allow-origins=* --profile-directory=""Default""",chPath)
-      ;       Notify().AddWindow("Não encontrei o site aberto no Chrome, Vou abrir pra você agora!",{Time:6000,Icon:28,Background:"0x900C3F",Title:"OPS!",TitleSize:15, Size:15, Color: "0xCDA089", TitleColor: "0xE1B9A4"},,"setPosBR")
-      ;       Sleep, 500
-      ;       contador1 := 0
-      ;       while !(PageInst)
-      ;       {
-      ;          Sleep, 500
-      ;          Notify().AddWindow("procurando instância do chrome...!",{Time:6000,Icon:28,Background:"0x1100AA",Title:"ERRO!",TitleSize:15, Size:15, Color: "0xCDA089", TitleColor: "0xE1B9A4"},,"setPosBR")
-      ;          PageInst := Chrome.GetPageByURL(URL, "contains")
-      ;          contador1++
-      ;          if(contador1 >= 30){
-      ;             PageInst.Disconnect()
-      ;             break
-      ;          }
-      ;       }
+      ;      user := A_UserName
+      ;      pass := "xrlo1010"
       ;    }
-      ;    Sleep, 500
-      ;    ; aqui está o fix pra esperar a página carregar
-      ;    PageInst := Chrome.GetPageByURL(URL, "contains")
-      ;    Sleep, 500
-      ; ; SUPER IMPORTANTE, ATIVAR A TAB/PÁGINA, ACTIVATE, FOCUS
-      ;    PageInst.Call("Page.bringToFront")
-   }else if(A_GuiEvent == "RightClick"){ ; CLIQUE COM BOTÃO DIREITO DO MOUSE
-      /*
-         ABRIR NOTION
-      */
-      if(A_UserName == "Felipe" || A_UserName == "estudos" || A_UserName == "Estudos")
-         {
-           user := A_UserName
-           pass := "xrlo1010"
-         }
-       Else
-         {
-           user := "felipe.lullio@hotmail.com"
-           pass := "XrLO1000@1010"
-         }
-      RunAs, %user%, %pass%
-      ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
-      Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe "%TextoLinhaSelecionadaNotion%", , Hide
-      RunAs
-      WinActivate, Notion
+      ;  Else
+      ;    {
+      ;      user := "felipe.lullio@hotmail.com"
+      ;      pass := "XrLO1000@1010"
+      ;    }
+      ; RunAs, %user%, %pass%
+      ; ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
+      ; Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe "%TextoLinhaSelecionadaNotion%", , Hide
+      ; RunAs
+      ; WinActivate, Notion
    }
 }
 
@@ -823,7 +858,8 @@ GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExporta
    LV_Delete()
    for x,y in strsplit(planilha,"`n","`r")
       ; if instr(y,VarPesquisarDados) ; se encontrar o texto digitado no searchbox na linha
-      if RegExMatch(y, "i).*" VarPesquisarDados ".*") ; se encontrar o texto digitado no searchbox na linha
+      ; if RegExMatch(y, "im).*" VarPesquisarDados ".*") ; se encontrar o texto digitado no searchbox na linha
+      if RegExMatch(y, "im)" VarPesquisarDados) ; (?<!https:\/\/www\.)notion
          {
          row := [], ++cnt
          loop, parse, y, CSV ; dividir a linha em células
@@ -930,18 +966,14 @@ checkSpreadsheetLink(PlanilhaLink){
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=0"
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Banco de Dados")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ZmlzAhTGDPCsAz9yHAQGHEGPFdLDh1sCE6D7ePHNLjM/edit?usp=sharing"        
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ZmlzAhTGDPCsAz9yHAQGHEGPFdLDh1sCE6D7ePHNLjM/edit#gid=0"        
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Programação")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1TkfWTjHWunj6A13X_cMydXX_UEant4sgMKfqr13mjiU/edit?usp=sharing"        
-      else if(PlanilhaLink = "Cursos")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1_flbbi427JI7NiIk4ZGZvAM9eRBM4dd_gTDFgw3Npo8/edit#gid=0"
-      else if(PlanilhaLink = "Relatórios")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=0"
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1TkfWTjHWunj6A13X_cMydXX_UEant4sgMKfqr13mjiU/edit#gid=0"        
       else if(PlanilhaLink = "Documentações GAPS")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=218001466"
-      else if(PlanilhaLink = "Outros")
-         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34/edit#gid=0"
+      else if(PlanilhaLink = "Tudo")
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/10HK3v8M6T_qkCGktAvqgH1_nmDRudK2SF20R5UGEgP4/edit#gid=0"
       ; TRATAR PELA URL DA PLANILHA
       Else If(RegExMatch(PlanilhaLink, "i).*docs.google.com/.+\/d\/.+\/"))
          Return linkPlanilha := PlanilhaLink
@@ -1058,6 +1090,9 @@ AtualizarPlanilha:
    PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    ; msgbox % PlanilhaLink PlanilhaQuery PlanilhaTipoExportacao PlanilhaRange PlanilhaNomeId
    GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   LV_ModifyCol(2, "left") 
+   LV_ModifyCol(2) 
+   LV_ModifyCol(2, "left") 
 Return
 /*
    * CASO O CHECKBOX DE "PESQUISAR POR COLUNA" ESTEJA MARCADO
@@ -1093,7 +1128,7 @@ MenuEditarBase:
   Gui, ConfigFile:Font, S10
   Gui, ConfigFile:Add, Text,center h20 +0x200, Alterar Link da Planilha:
   IniRead, PlanilhaLink, %iniPath%, planilha, linkPlanilha
-  Gui ConfigFile:Add, ComboBox, y+5 w415 center vPlanilhaLink hwndDimensoesID gValidarLink,Documentações Analytics|Documentações Banco de Dados|Documentações Programação|Documentações GAPS|Cursos|Relatórios|%PlanilhaLink%
+  Gui ConfigFile:Add, ComboBox, y+5 w415 center vPlanilhaLink hwndDimensoesID gValidarLink,Documentações Analytics|Documentações Banco de Dados|Documentações Programação|Documentações GAPS|Tudo|%PlanilhaLink%
 
   Gui, ConfigFile:Add, Text, center h20 +0x200, Nome/ID da aba da Planilha(Worksheet)
   Gui, ConfigFile:Add, Edit, w415 y+5 vPlanilhaNomeId
@@ -1195,4 +1230,131 @@ Return
 ;  idioma := "?hl=en"
 
 ; Return
+      ; Alterar e incluir as opções da imagem?
+      displayText(text){
+         global
+         Gui, img:New, +hwndpasteText%displayNum% -Caption +AlwaysOnTop +ToolWindow -DPIScale
+         local textHnd := pasteText%displayNum%
+         Gui, img:Margin, 10, 10
+         Gui, img:Font, s16
+         Gui, img:Add, Text,, % text
+         OnMessage(0x201, "move_Win")
+         OnMessage(0x203, "close_Win")
+         Gui, img:Show,, pasteToScreen_text
+         transparency%textHnd% := 100
+         displayNum++
+      }
+      close_Win(){
+         id := WinExist("A")
+         transparency%id% := ""
+         scale%id% := ""
+         width%id% := ""
+         height%id% := ""
+         Gui, img:Destroy
+      }
+      move_Win(){
+         PostMessage, 0xA1, 2
+      }
+      ; GetBitmapFromClipboard() {
+      ;    static CF_BITMAP := 2, CF_DIB := 8, SRCCOPY := 0x00CC0020
+      ;    if !DllCall("IsClipboardFormatAvailable", "UInt", CF_BITMAP)
+      ;       throw "Não encontrei imagem no desktop"
+      ;    if !DllCall("OpenClipboard", "Ptr", 0)
+      ;       throw "OpenClipboard failed"
+      ;    hDIB := DllCall("GetClipboardData", "UInt", CF_DIB, "Ptr")
+      ;    hBM := DllCall("GetClipboardData", "UInt", CF_BITMAP, "Ptr")
+      ;    DllCall("CloseClipboard")
+      ;    if !hDIB
+      ;       throw "GetClipboardData failed"
+      ;    pDIB := DllCall("GlobalLock", "Ptr", hDIB, "Ptr")
+      ;    width := NumGet(pDIB + 4, "UInt")
+      ;    height := NumGet(pDIB + 8, "UInt")
+      ;    bpp := NumGet(pDIB + 14, "UShort")
+      ;    DllCall("GlobalUnlock", "Ptr", pDIB)
+      
+      ;    hDC := DllCall("CreateCompatibleDC", "Ptr", 0, "Ptr")
+      ;    oBM := DllCall("SelectObject", "Ptr", hDC, "Ptr", hBM, "Ptr")
+      
+      ;    hMDC := DllCall("CreateCompatibleDC", "Ptr", 0, "Ptr")
+      ;    hNewBM := CreateDIBSection(width, -height,, bpp)
+      ;    oPrevBM := DllCall("SelectObject", "Ptr", hMDC, "Ptr", hNewBM, "Ptr")
+      ;    DllCall("BitBlt", "Ptr", hMDC, "Int", 0, "Int", 0, "Int", width, "Int", height
+      ;       , "Ptr", hDC , "Int", 0, "Int", 0, "UInt", SRCCOPY)
+      ;    DllCall("SelectObject", "Ptr", hDC, "Ptr", oBM, "Ptr")
+      ;    DllCall("DeleteDC", "Ptr", hDC), DllCall("DeleteObject", "Ptr", hBM)
+      ;    DllCall("SelectObject", "Ptr", hMDC, "Ptr", oPrevBM, "Ptr")
+      ;    DllCall("DeleteDC", "Ptr", hMDC)
+      ;    Return hNewBM
+      ; }
+      
+      ; CreateDIBSection(w, h, ByRef ppvBits := 0, bpp := 32) {
+      ;    hDC := DllCall("GetDC", "Ptr", 0, "Ptr")
+      ;    VarSetCapacity(BITMAPINFO, 40, 0)
+      ;    NumPut(40 , BITMAPINFO, 0)
+      ;    NumPut( w , BITMAPINFO, 4)
+      ;    NumPut( h , BITMAPINFO, 8)
+      ;    NumPut( 1 , BITMAPINFO, 12)
+      ;    NumPut(bpp, BITMAPINFO, 14)
+      ;    hBM := DllCall("CreateDIBSection", "Ptr", hDC, "Ptr", &BITMAPINFO, "UInt", 0
+      ;       , "PtrP", ppvBits, "Ptr", 0, "UInt", 0, "Ptr")
+      ;    DllCall("ReleaseDC", "Ptr", 0, "Ptr", hDC)
+      ;    return hBM
+      ; }
+      
+      ; SaveBitmapToJpeg(hBitmap, destJpegFilePath, quality := 0.75) {
+      ;     static CLSID_WICImagingFactory  := "{CACAF262-9370-4615-A13B-9F5539DA4C0A}"
+      ;          , IID_IWICImagingFactory   := "{EC5EC8A9-C395-4314-9C77-54D7A935FF70}"
+      ;          , GUID_ContainerFormatJpeg := "{19E4A5AA-5662-4FC5-A0C0-1758028E1057}"
+      ;          , WICBitmapIgnoreAlpha := 0x2, GENERIC_WRITE := 0x40000000, VT_R4 := 0x00000004
+      ;          , WICBitmapEncoderNoCache := 0x00000002, szPROPBAG2 := 24 + A_PtrSize*2
+      
+      ;    VarSetCapacity(GUID, 16, 0)
+      ;    DllCall("Ole32\CLSIDFromString", "WStr", GUID_ContainerFormatJpeg, "Ptr", &GUID)
+      ;    IWICImagingFactory := ComObjCreate(CLSID_WICImagingFactory, IID_IWICImagingFactory)
+      ;    Vtable( IWICImagingFactory    , CreateBitmapFromHBITMAP := 21 ).Call("Ptr", hBitmap, "Ptr", 0, "UInt", WICBitmapIgnoreAlpha, "PtrP", IWICBitmap)
+      ;    Vtable( IWICImagingFactory    , CreateStream            := 14 ).Call("PtrP", IWICStream)
+      ;    Vtable( IWICStream            , InitializeFromFilename  := 15 ).Call("WStr", destJpegFilePath, "UInt", GENERIC_WRITE)
+      ;    Vtable( IWICImagingFactory    , CreateEncoder           :=  8 ).Call("Ptr", &GUID, "Ptr", 0, "PtrP", IWICBitmapEncoder)
+      ;    Vtable( IWICBitmapEncoder     , Initialize              :=  3 ).Call("Ptr", IWICStream, "UInt", WICBitmapEncoderNoCache)
+      ;    Vtable( IWICBitmapEncoder     , CreateNewFrame          := 10 ).Call("PtrP", IWICBitmapFrameEncode, "PtrP", IPropertyBag2)
+      
+      ;    Vtable( IPropertyBag2         , CountProperties         :=  5 ).Call("UIntP", count)
+      ;    VarSetCapacity(arrPROPBAG2    , szPROPBAG2*count, 0)
+      ;    Vtable( IPropertyBag2         , GetPropertyInfo         :=  6 ).Call("UInt", 0, "UInt", count, "Ptr", &arrPROPBAG2, "UIntP", read)
+      ;    Loop % read
+      ;       addr := &arrPROPBAG2 + szPROPBAG2*(A_Index - 1)
+      ;    until StrGet(NumGet(addr + 8 + A_PtrSize)) = "ImageQuality" && found := true
+      ;    if found {
+      ;       VarSetCapacity(variant, 24, 0)
+      ;       NumPut(VT_R4, variant)
+      ;       NumPut(quality, variant, 8, "Float")
+      ;       Vtable( IPropertyBag2, Write := 4 ).Call("UInt", 1, "Ptr", addr, "Ptr", &variant)
+      ;    }
+      ;    Vtable( IWICBitmapFrameEncode , Initialize              :=  3 ).Call("Ptr", IPropertyBag2)
+      ;    Vtable( IWICBitmapFrameEncode , WriteSource             := 11 ).Call("Ptr", IWICBitmap, "Ptr", 0)
+      ;    Vtable( IWICBitmapFrameEncode , Commit                  := 12 ).Call()
+      ;    Vtable( IWICBitmapEncoder     , Commit                  := 11 ).Call()
+      ;    for k, v in [IWICBitmapFrameEncode, IWICBitmapEncoder, IPropertyBag2, IWICStream, IWICBitmap, IWICImagingFactory]
+      ;       ObjRelease(v)
+      ; }
+      
+      ; Vtable(ptr, n) {
+      ;    return Func("DllCall").Bind(NumGet(NumGet(ptr+0), A_PtrSize*n), "Ptr", ptr)
+      ; }
 
+      pasteToScreen(){
+         if DllCall("IsClipboardFormatAvailable", "UInt", 1)
+            displayText(Clipboard)
+         ; If DllCall("IsClipboardFormatAvailable", "UInt", 2){
+         ;    if DllCall("OpenClipboard", "uint", 0) {
+         ;       hBitmap := DllCall("GetClipboardData", "uint", 2)
+         ;       DllCall("CloseClipboard")
+         ;    }
+         ;    displayImg(hBitmap)
+         ; }
+         ; ; if DllCall("IsClipboardFormatAvailable", "UInt", 15){
+         ; ;    imgFile := Clipboard
+         ; ;    if(hBitmap := LoadPicture(imgFile))
+         ; ;       displayImg(hBitmap)
+         ; ; }
+      }
