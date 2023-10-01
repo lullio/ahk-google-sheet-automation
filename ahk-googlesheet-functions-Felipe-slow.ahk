@@ -191,7 +191,9 @@ PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
 ; msgbox %PlanilhaLink%
 If(PlanilhaLink)
 {
+   ; GoSub, AtualizarPlanilha
    GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   
    ; global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
    ; global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
    ; global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
@@ -222,6 +224,7 @@ IniWrite, %PlanilhaRegexURL%, %iniPath%, planilha, regexURLPlanilha
 IniWrite, %PlanilhaRange%, %iniPath%, planilha, rangePlanilha
  ; Query da Planilha
 IniWrite, %PlanilhaQuery%, %iniPath%, planilha, queryPlanilha
+GoSub, ReadIniFile
 Notify().AddWindow("Configuração atualizada!`nClique no botão Atualizar para atualizar os dados!",{Time:5000,Icon:177,Background:"0x039018",Title:"SUCESSO",TitleColor:"0xF0F8F1", TitleSize:15, Size:15, Color: "0xF0F8F1"},"","setPosBR")
 ; global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
 ; global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
@@ -473,8 +476,9 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
 /*
    * FUNÇÃO PARA CAPTURAR AÇÃO AO CLICAR NA LISTVIEW
 */
-GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId, regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*", action := "openLink"){
+GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId, regexFindColumnName:= ".*Nome.*", regexFindColumnURL := "i).*(URL|Link).*", action := "openLink", listViewEnterKey := ""){
    Gui Submit, NoHide
+   ; msgbox % listViewEnterKey ; apertoUeNTER NA LISTVIEW
    ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
    ; * CAPTURAR A LINHA SELECIONADA NA LISTVIEW
    NumeroLinhaSelecionada := LV_GetNext() 
@@ -501,7 +505,7 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
    ; msgbox % getColumnURL.arrColumnSanitize[NumeroLinhaSelecionada+1]
 
    ; msgbox % A_GuiEvent
-   if(A_GuiEvent = "DoubleClick" && action = "openLink"){ ; abrir link normal
+   if(A_GuiEvent = "DoubleClick" && action = "openLink" || listViewEnterKey = "apertouEnter"){ ; abrir link normal
       /*
          * ABRIR OS LINKS/URLS/DOCUMENTAÇÕES NO NAVEGADOR
          ! IMPORTANTE: Caso tenha mais de um link na coluna, transformar em um array e fazer um loop para abrir os links
@@ -597,7 +601,7 @@ GerarTabsListas:
    if(countGerarTabs = 1){
       GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
    }else{
-      MsgBox, 4112 , Erro!, Não é possível gerar tabs repetidas!`n Reinicie o programa(CTRL+R), 8
+      MsgBox, 4112 , Erro!, Você já gerou as tabs!`n Reinicie o programa(CTRL+R) se quiser gerar novamente, 8
    }
    countGerarTabs++
 Return
@@ -859,24 +863,28 @@ GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExporta
    for x,y in strsplit(planilha,"`n","`r")
       ; if instr(y,VarPesquisarDados) ; se encontrar o texto digitado no searchbox na linha
       ; if RegExMatch(y, "im).*" VarPesquisarDados ".*") ; se encontrar o texto digitado no searchbox na linha
-      if RegExMatch(y, "im)" VarPesquisarDados) ; (?<!https:\/\/www\.)notion
+      if (RegExMatch(y, "im)" VarPesquisarDados) && x>1) ; x>1 para nao pegar o header (?<!https:\/\/www\.)notion
          {
          row := [], ++cnt
          loop, parse, y, CSV ; dividir a linha em células
-            if (a_index <= 13)																	;or if a_index in 1,4,5
+            ; if (a_index <= 13)																	;or if a_index in 1,4,5
                row.push(a_loopfield)
          LV_add("",row*)
          }
    SB_SetText("Match(es) da última Pesquisa: " cnt,  4)
-   loop, % lv_getcount("col")
-      LV_ModifyCol(a_index,"AutoHdr")
+   ; loop, % lv_getcount("col")
+      ; LV_ModifyCol(a_index,"AutoHdr")
+   ; LV_ModifyCol(1, "30 right")
    GuiControl, +Redraw, LVAll
+   GuiControl, Focus, LVAll ; dar foco na listview após pesquisar
+   LV_Modify(1, "+Select") ; selecionar primeiro item da listview
    i++
    If(LV_GetCount() = 0){
-      MsgBox, 4112 , Erro!, A Pesquisa não retornou nada`nVamos atualizar os dados!, 2
+      MsgBox, 4112 , Erro!, A Pesquisa não retornou nada`nAtualizando...!, 2
       GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
       ; Sleep, 500
       ; Notify().AddWindow("Erro",{Time:3000,Icon:28,Background:"0x990000",Title:"ERRO",TitleSize:15, Size:15, Color: "0xCDA089", TitleColor: "0xE1B9A4"},"w330 h30","setPosBR")
+      GuiControl, Focus, BtnPesquisar ; dar foco no botao
    }
 }
 
@@ -928,6 +936,7 @@ GS_GetListView_Update(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Plani
    ; msgbox %PlanilhaTipoExportacao% %PlanilhaLink% %PlanilhaNomeId% %PlanilhaRange% %PlanilhaQuery%
    ; sheetData_All := GS_GetCSV(capture_sheetURL_key1, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, capture_sheetURL_name1)
    ; PlanilhaLink := checkSpreadsheetLink(PlanilhaLink)
+   ; Gui, ListView, LVAll
    LV_Delete() ; deletar todas as linhas
    ; deletar todas as colunas
    Loop, % LV_GetCount("Column") 
@@ -1099,11 +1108,24 @@ Return
 */
 PesquisarDados:
    Gui Submit, NoHide
-   If(CheckPesquisarColuna = true){ ; se o checkbox estiver marcado
-      GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
-   }else{
-      GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   /*
+      * HACK / TÉCNICA PARA USAR SOMENTE 1 BOTÃO(PESQUISAR) para fazer as pesquisas e para abrir a documentação caso o usuário tenha apertado enter na listview, ou seja,
+      * Quando aperta Enter na gui, ela vai executar o botão que tá com "Default", ou seja, vai executar o botão Pesquisar, então, to na listview, apertei enter, vai checar aqui embaixo, se o foco estiver na listview, abra a documentação, se não, foi executado uma pesquisa mesmo
+   */
+   GuiControlGet,FocusControl,Focus
+   ; msgbox %FocusControl%
+   If (FocusControl = "SysListView321")
+   {
+      if(CheckIdiomaPt)
+         GS_GetListView_Click("?hl=pt-br",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId,,,, "apertouEnter")
+      Else
+         GS_GetListView_Click("?hl=en",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId,,,, "apertouEnter")
+      ;  GuiControl, Focus, BtnPesquisar ; dar foco no botao
    }
+   Else If(CheckPesquisarColuna = true) ; se o checkbox estiver marcado
+      GS_SearchColumns(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
+   Else
+      GS_SearchRows(VarPesquisarDados,PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
 Return
 
 /*
@@ -1132,7 +1154,6 @@ MenuEditarBase:
 
   Gui, ConfigFile:Add, Text, center h20 +0x200, Nome/ID da aba da Planilha(Worksheet)
   Gui, ConfigFile:Add, Edit, w415 y+5 vPlanilhaNomeId
-
   /*
       * COLUNA 2 - metade
   */
@@ -1358,3 +1379,4 @@ Return
          ; ;       displayImg(hBitmap)
          ; ; }
       }
+
