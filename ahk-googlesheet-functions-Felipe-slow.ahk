@@ -194,8 +194,8 @@ If(PlanilhaLink)
    ; GoSub, AtualizarPlanilha
    GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
    
-   ; global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
-   ; global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+   global posicaoColunaNome := GS_GetCSV_Column(, ".*Nome.*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
+   global posicaoColunaURL := GS_GetCSV_Column(, "i).*(URL|Site|link).*",PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId).ColumnPosition
    ; global planilha := GS_GetCSV(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
    ; Run %iniFile%
 }
@@ -694,6 +694,7 @@ GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaR
                      {
                         LineNumber := A_Index ; Index da linha
                         LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+                        ; msgbox % LineContent
                         if(InStr(LineContent, category))
                         {
                            Coluna%category%.push(StrSplit(LineContent, ",")[posicaoColunaNome])
@@ -703,7 +704,9 @@ GerarTabsComboBox(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaR
                            ; GuiControl,,  "|hello"
                         }
                      }
+                     Gui, Font, S9
                      Gui, Add, ComboBox, y+5 w200 hwndIdEventos, %ListaDeNomes%
+                     Gui, Font, S10
                      ; Resetar a lista de nomes após concluir de preencher um COMBOBOX
                      ListaDeNomes := ""
                      countComboBoxColuna1++
