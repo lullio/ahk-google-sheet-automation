@@ -572,6 +572,9 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
       ; displayNum := 0
       ; visibleState := true
       pasteToScreen()
+   }Else{
+      Notify().AddWindow("Não existe nenhum código para o campo selecionado!!",{Time:2000,Icon:177,Background:"0x039018",Title:"INFO!",TitleSize:15, Size:14, Color: "0xFFFF", TitleColor: "0xE1B9A4"},,"setPosBR")
+
    }
       ; /*
       ;    ABRIR NOTION
