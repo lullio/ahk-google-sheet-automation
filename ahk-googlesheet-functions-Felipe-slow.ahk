@@ -530,7 +530,7 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
                   }
                RunAs, %user%, %pass%
                ; Run, C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe 
-               Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe URLNotion, , Hide
+               Run %ComSpec% /c C:\Users\felipe\AppData\Local\Programs\Notion\Notion.exe "%URLNotion%", , Hide
                RunAs
                WinActivate, Notion
             }
