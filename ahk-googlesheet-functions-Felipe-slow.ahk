@@ -1251,10 +1251,13 @@ gui, SearchInternet:Add, Edit , h30 yp+20 xp+10 w360  vSearchTerm section
 Gui, Font, S9
 gui, SearchInternet:Add, ComboBox, y+10 w175 vSearchTermWhere , em qualquer lugar da página||no título da página|no texto da página|na URL da página|em links para a página
 gui, SearchInternet:Add, ComboBox, x+10 w175 vSearchTermFileType, Qualquer tipo de arquivo||PDF|Word|Excel|Power Point
-gui, SearchInternet:Add, Button, xs y+10 w120 h33 gSearch Default, &Pesquisar
-Gui, SearchInternet:Add, Button, x+10 w100 h33 gCancel Cancel, Cancelar
-gui, SearchInternet:Add, Checkbox, x+10 checked1 vlanguage, Pesquisar em Português. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
-gui, SearchInternet:Add, Checkbox, y+5 checked1 vquotes, Adicionar aspas na Pesquisa. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
+Gui, Font, S10
+gui, SearchInternet:Add, Button, xs y+10 w175 h30 gSearch Default, &Pesquisar
+Gui, SearchInternet:Add, Button, x+10 w100 h30 gCancel Cancel, Cancelar
+Gui, Font, S9
+
+gui, SearchInternet:Add, Checkbox, x+10 checked1 vlanguage, Pesquisa pt-br. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
+gui, SearchInternet:Add, Checkbox, y+5 checked1 vquotes, Pesquisa Exata. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
 
 
 gui, SearchInternet:font, S10  ;Change font size to 12
