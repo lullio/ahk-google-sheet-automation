@@ -1218,7 +1218,7 @@ Menu, MenuAjuda, Add, &Coloque as palavras exatas entre aspas: "google analytics
 Menu, MenuAjuda, Add, &Coloque 2 pontos entre os números e adicione uma unidade de medida: 2010..2011|10..35 lb|US$ 300..US$ 500, MenuAjudaNotify
 
 ; * TIME
-Menu, MenuExemploTime, Add, avengers endgame before:2019, MenuAjudaExemplos
+Menu, MenuExemploTime, Add,avengers endgame before:2019, MenuAjudaExemplos
 Menu, MenuExemploTime, Add, the best donuts in Boston before:2008-01-01, MenuAjudaExemplos
 Menu, MenuExemploTime, Add, one-hit wonders after:1999-12-31 before:2001-01-01, MenuAjudaExemplos
 ; * HACK
@@ -1425,6 +1425,7 @@ Return
 
 MenuAjudaExemplos:
    GuiControl,, SearchTerm, %A_ThisMenuItem%
+   GuiControl,, quotes, 0 ; * desmarcar o checkbox que põe aspas entre a pesquisa
 Return
 
       /*
