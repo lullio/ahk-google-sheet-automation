@@ -60,20 +60,20 @@ MENU BAR
 */
 Menu, FileMenu, Add, &Abrir Planilha Atual`tCtrl+O, MenuAbrirLink
 Menu, FileMenu, Add ; with no more options, this is a seperator
-Menu, FileMenu, Add, &Abrir Planilha Analytics`tCtrl+O, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Planilha Database`tCtrl+O, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Planilha Programming`tCtrl+O, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Planilha All`tCtrl+O, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha Analytics`tCtrl+1, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha Database`tCtrl+2, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha Programming`tCtrl+3, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha All`tCtrl+4, MenuAbrirLink
 Menu, FileMenu, Add ; with no more options, this is a seperator
-Menu, FileMenu, Add, &Abrir Pasta Documentações Drive`tCtrl+W, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta Documentações Template Drive`tCtrl+D, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta Documentações Oficiais Drive, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta Pixels Drive`tCtrl+P, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Pasta do Script`tCtrl+E, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Documentações Drive`tCtrl+5, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Documentações Template Drive`tCtrl+6, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Documentações Oficiais Drive`tCtrl+7, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta Pixels Drive`tCtrl+8, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Pasta do Script`tCtrl+9, MenuAbrirLink
 
 Menu, EditMenu, Add, Trocar Planilha e suas Configurações`tCtrl+S, MenuEditarBase
-Menu, EditMenu, Add, Pesquisar no Google`tCtrl+S, MenuEditarBase
-Menu, EditMenu, Add, Colunas e Pesquisas`tCtrl+P, MenuEditarBase
+Menu, EditMenu, Add, Pesquisar no Google`tCtrl+G, MenuEditarBase
+; Menu, EditMenu, Add, Colunas e Pesquisas`tCtrl+P, MenuEditarBase
 ; Menu, EditMenu, Add, Trocar Planilha(Aba), MenuEditarBase
 ; Menu, EditMenu, Add, Alterar Formato de Exportação`tCtrl+A, MenuEditarBase
 ; Menu, EditMenu, Add, Alterar Range de Dados`tCtrl+A, MenuEditarBase
@@ -1209,12 +1209,52 @@ MenuEditarBase:
 Else If(InStr(A_ThisMenuItem, "Pesquisar no Google")) ; * GUI PARA PESQUISAR NO GOOGLE
 {
 Gui, SearchInternet:New, +AlwaysOnTop -Resize -MinimizeBox -MaximizeBox, Pesquisar no Google
+Menu, MenuAjuda, Add, &Coloque um sinal de menos antes das palavras que você não deseja: -roedor, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Coloque um sinal de mais antes das palavras que você deseja: +roedor, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Coloque o wildcard * para representar qualquer coisa: top * ranking sp, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Pesquise por intervalos de data: " one-hit wonders after:1999-12-31 before:2001-01-01 ", MenuAjudaNotify
+Menu, MenuAjuda, Add, &Digite OR entre todas as palavras desejadas: miniatura OR padrão, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Coloque as palavras exatas entre aspas: "google analytics", MenuAjudaNotify
+Menu, MenuAjuda, Add, &Coloque 2 pontos entre os números e adicione uma unidade de medida: 2010..2011|10..35 lb|US$ 300..US$ 500, MenuAjudaNotify
 
-Gui, SearchInternet:Add, GroupBox, x0 w600 r3, Pesquisa: ;add a groupbox
+; * TIME
+Menu, MenuExemploTime, Add, avengers endgame before:2019, MenuAjudaExemplos
+Menu, MenuExemploTime, Add, the best donuts in Boston before:2008-01-01, MenuAjudaExemplos
+Menu, MenuExemploTime, Add, one-hit wonders after:1999-12-31 before:2001-01-01, MenuAjudaExemplos
+; * HACK
+Menu, MenuExemploHack, Add, intitle:"webcamXP 5", MenuAjudaExemplos
+Menu, MenuExemploHack, Add, intext:"index of" inurl:ftp, MenuAjudaExemplos
+Menu, MenuExemploHack, Add, intext:inurl:/wp-content/uploads/ ext:txt "username" AND "password" | "pwd" | "pw", MenuAjudaExemplos
+Menu, MenuExemploHack, Add, intitle:"index of" "dump.sql", MenuAjudaExemplos
+; * ARQUIVOS
+Menu, MenuExemploDoc, Add, site:gov.br filetype:txt password, MenuAjudaExemplos
+Menu, MenuExemploDoc, Add, site:gov.br filetype:xls cpf, MenuAjudaExemplos
+Menu, MenuExemploDoc, Add, "index of /" site:gov.br cpf, MenuAjudaExemplos
+; * TÉCNICAS
+Menu, MenuExemploTec, Add, +inurl:robots.txt +filetype:txt, MenuAjudaExemplos
+Menu, MenuExemploTec, Add, site:gov.br filetype:txt password, MenuAjudaExemplos
+Menu, MenuExemploTec, Add, "escola de * de belo horizonte" -yoga, MenuAjudaExemplos
+Menu, MenuExemploTec, Add, cache:websitename.com -yoga, MenuAjudaExemplos
+Menu, MenuExemploTec, Add, word one intext: other term, MenuAjudaExemplos
+
+; Attach the sub-menus that were created above.
+Menu, MenuPesquisa, Add, &Ajuda, :MenuAjuda
+Menu, MenuPesquisa, Add, &Exemplo Tempo, :MenuExemploTime
+Menu, MenuPesquisa, Add, &Exemplo GHDB, :MenuExemploHack
+Menu, MenuPesquisa, Add, &Exemplo Documento, :MenuExemploDoc
+Menu, MenuPesquisa, Add, &Exemplo Técnicas, :MenuExemploTec
+
+Gui, SearchInternet:Menu, MenuPesquisa ; Attach MyMenuBar to the GUI
+Gui, SearchInternet:Add, GroupBox, x0 w420 r6, Pesquisa: ;add a groupbox
+Gui, Font, S11
 gui, SearchInternet:Add, Edit , h30 yp+20 xp+10 w360  vSearchTerm section
-gui, SearchInternet:Add, Button, x+10 w100 h30 gSearch Default, &Pesquisar Google
-Gui, SearchInternet:Add, Button, x+10 w100 h30, Cancelar
-gui, SearchInternet:Add, Checkbox, xs y+5 checked1 vquotes, Adicionar aspas na Pesquisa. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
+Gui, Font, S9
+gui, SearchInternet:Add, ComboBox, y+10 w175 vSearchTermWhere , em qualquer lugar da página||no título da página|no texto da página|na URL da página|em links para a página
+gui, SearchInternet:Add, ComboBox, x+10 w175 vSearchTermFileType, Qualquer tipo de arquivo||PDF|Word|Excel|Power Point
+gui, SearchInternet:Add, Button, xs y+10 w120 h33 gSearch Default, &Pesquisar
+Gui, SearchInternet:Add, Button, x+10 w100 h33 gCancel Cancel, Cancelar
+gui, SearchInternet:Add, Checkbox, x+10 checked1 vlanguage, Pesquisar em Português. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
+gui, SearchInternet:Add, Checkbox, y+5 checked1 vquotes, Adicionar aspas na Pesquisa. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
 
 
 gui, SearchInternet:font, S10  ;Change font size to 12
@@ -1232,13 +1272,13 @@ gui, SearchInternet:Add, Checkbox, y+10 checked0 vgithub, Github.com
 ; * 3ª COLUNA DOS CHECKBOXES
 gui, SearchInternet:Add, Checkbox, ys x+80 Checked1 vReddit, Reddit.com
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vubuntu, Askubuntu.Com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 vgeneral, General
 
 gui, SearchInternet:Show
 GuiControl,SearchInternet:Focus,SearchTerm
-GuiControl, +Default, Pesquisar Google
 return
 Search:
-Gui, Submit ;Needed to pull inf0 from controls
+Gui, Submit, NoHide ;Needed to pull inf0 from controls
 ; msgbox % SearchTerm
 If(StrLen(SearchTerm) < 5)
 {
@@ -1246,9 +1286,44 @@ If(StrLen(SearchTerm) < 5)
       GuiControl,SearchInternet:Focus,SearchTerm
       SearchTerm := ""
 }Else
+; &lr=lang_en
+; termos aparecem onde? allintitle:
+; termos aparecem onde? allintext::
+; allinurl:
+; allinanchor:
 {
-   if quotes ;if selected, url enclude double quotes around search term
+
+   ; período de tempo &as_qdr=w
+   ; *if selected, url enclude double quotes around search term
+   If quotes 
 	   SearchTerm:="%22" SearchTerm "%22"
+
+   ; *if selected, url enclude parameters language
+   If language
+      SearchTerm := SearchTerm "&lr=lang_pt"
+   Else
+      SearchTerm := SearchTerm "&lr=lang_en"
+   If(InStr(SearchTermWhere, "qualquer lugar"))
+      SearchTerm := SearchTerm "&as_occt=any"
+   Else If(InStr(SearchTermWhere, "título"))
+      SearchTerm := SearchTerm "&as_occt=title"
+   Else If(InStr(SearchTermWhere, "texto"))
+      SearchTerm := SearchTerm "&as_occt=body"
+   Else If(InStr(SearchTermWhere, "url"))
+      SearchTerm := SearchTerm "&as_occt=url"
+   Else If(InStr(SearchTermWhere, "links"))
+      SearchTerm := SearchTerm "&as_occt=links"
+
+   ; *if selected, search term include filetype  
+   If(InStr(SearchTermFileType, "pdf"))
+      SearchTerm := SearchTerm "&as_filetype=pdf"
+   Else If(InStr(SearchTermFileType, "word"))
+      SearchTerm := SearchTerm "&as_filetype=doc"
+   Else If(InStr(SearchTermFileType, "power point"))
+      SearchTerm := SearchTerm "&as_filetype=ppt"
+   Else If(InStr(SearchTermFileType, "Qualquer"))
+      SearchTerm := SearchTerm "&as_filetype="
+   
 
    if (stackBR=0 AND stackAHK=0 AND ahk=0 AND Reddit=0 AND tech=0)
       run "http://www.google.com/search?q=%SearchTerm%"
@@ -1272,6 +1347,9 @@ If(StrLen(SearchTerm) < 5)
       run "http://www.google.com/search?q=%SearchTerm%+site:askubuntu.com"
    If github
       run "http://www.google.com/search?q=%SearchTerm%+site:github.com"
+   If general
+      run "http://www.google.com/search?q=%SearchTerm%"
+   SearchTerm:=""
 }
 Return
 }
@@ -1342,7 +1420,13 @@ Else If(InStr(A_ThisMenuItem, "Qual é a função do botão 'Atualizar'"))
 Else If(InStr(A_ThisMenuItem, "Qual é a função do menu 'Editar'"))
    ; msgbox SUCESSO com SOM e ICONE alwaysontop
    MsgBox, 4160 , INFORMAÇÃO!, Dentro do menu 'Editar'`, você encontra a opção para definir e editar as configurações das requisições HTTP GET e POST.`n`nObservação: faça alterações apenas se estiver familiarizado com o processo`, pois trata-se de uma configuração ""avançada"""., 900
+
 Return
+
+MenuAjudaExemplos:
+   GuiControl,, SearchTerm, %A_ThisMenuItem%
+Return
+
       /*
          * STATUS BAR, TRATAR STATUSBAR
       */
