@@ -1306,6 +1306,7 @@ If(StrLen(SearchTerm) < 5)
       SearchTerm := SearchTerm "&lr=lang_pt"
    Else
       SearchTerm := SearchTerm "&lr=lang_en"
+
    If(InStr(SearchTermWhere, "qualquer lugar"))
       SearchTerm := SearchTerm "&as_occt=any"
    Else If(InStr(SearchTermWhere, "título"))
@@ -1331,25 +1332,25 @@ If(StrLen(SearchTerm) < 5)
    if (stackBR=0 AND stackAHK=0 AND ahk=0 AND Reddit=0 AND tech=0)
       run "http://www.google.com/search?q=%SearchTerm%"
    If stackBR
-      run "http://www.google.com/search?q=%SearchTerm%+site:pt.stackoverflow.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=pt.stackoverflow.com"
    If stack
-      run "http://www.google.com/search?q=%SearchTerm%+site:stackoverflow.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=stackoverflow.com"
    If stackAHK
-      run "http://www.google.com/search?q=%SearchTerm%+site:stackoverflow.com/questions/tagged/autohotkey?sort=Newest&edited=true"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=stackoverflow.com/questions/tagged/autohotkey?sort=Newest&edited=true"
    If reddit
-      run "http://www.google.com/search?q=%SearchTerm%+site:reddit.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=reddit.com"
    If ahk
-      run "http://www.google.com/search?q=%SearchTerm%+site:autohotkey.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=autohotkey.com"
    If stackex
-      run "http://www.google.com/search?q=%SearchTerm%+site:stackexchange.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=stackexchange.com"
    If quora
-      run "http://www.google.com/search?q=%SearchTerm%+site:quora.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=quora.com"
    ; If estaclex
-   ; run "http://www.google.com/search?q=%SearchTerm%+site:english.stackexchange.com"
+   ; run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=english.stackexchange.com"
    If ubuntu
-      run "http://www.google.com/search?q=%SearchTerm%+site:askubuntu.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=askubuntu.com"
    If github
-      run "http://www.google.com/search?q=%SearchTerm%+site:github.com"
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=github.com"
    If general
       run "http://www.google.com/search?q=%SearchTerm%"
    SearchTerm:=""
