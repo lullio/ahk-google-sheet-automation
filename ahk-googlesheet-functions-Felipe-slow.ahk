@@ -1213,6 +1213,9 @@ MenuEditarBase:
 Else If(InStr(A_ThisMenuItem, "Pesquisar no Google")) ; * GUI PARA PESQUISAR NO GOOGLE
 {
 Gui, SearchInternet:New, +AlwaysOnTop -Resize -MinimizeBox -MaximizeBox, Pesquisar no Google
+Menu, MenuAjuda, Add, &Desmarcar Todos Sites`tCtrl+Shift+U, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Marcar Principais Sites`tCtrl+Shift+C, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Marcar Todos Sites`tCtrl+Shift+A, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque um sinal de menos antes das palavras que você não deseja: -roedor, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque um sinal de mais antes das palavras que você deseja: +roedor, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque o wildcard * para representar qualquer coisa: top * ranking sp, MenuAjudaNotify
@@ -1263,7 +1266,6 @@ Gui, Font, S9
 gui, SearchInternet:Add, Checkbox, x+10 checked1 vlanguage, Pesquisa pt-br. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
 gui, SearchInternet:Add, Checkbox, y+5 checked1 vquotes, Pesquisa Exata. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
 
-
 gui, SearchInternet:font, S10  ;Change font size to 12
 
 ; *1ª COLUNA DOS CHECKBOXES
@@ -1302,7 +1304,7 @@ If(StrLen(SearchTerm) < 5)
 
    ; período de tempo &as_qdr=w
    ; *if selected, url enclude double quotes around search term
-   If quotes 
+   If quotes
 	   SearchTerm:="%22" SearchTerm "%22"
 
    ; *if selected, url enclude parameters language
@@ -1322,7 +1324,7 @@ If(StrLen(SearchTerm) < 5)
    Else If(InStr(SearchTermWhere, "links"))
       SearchTerm := SearchTerm "&as_occt=links"
 
-   ; *if selected, search term include filetype  
+   ; *if selected, search term include filetype
    If(InStr(SearchTermFileType, "pdf"))
       SearchTerm := SearchTerm "&as_filetype=pdf"
    Else If(InStr(SearchTermFileType, "word"))
@@ -1331,7 +1333,6 @@ If(StrLen(SearchTerm) < 5)
       SearchTerm := SearchTerm "&as_filetype=ppt"
    Else If(InStr(SearchTermFileType, "Qualquer"))
       SearchTerm := SearchTerm "&as_filetype="
-   
 
    if (stackBR=0 AND stackAHK=0 AND ahk=0 AND Reddit=0 AND tech=0)
       run "http://www.google.com/search?q=%SearchTerm%"
@@ -1362,7 +1363,6 @@ If(StrLen(SearchTerm) < 5)
 Return
 }
 Return
-
 
 MenuAbrirLink:
    Gui Submit, NoHide
@@ -1430,7 +1430,79 @@ Else If(InStr(A_ThisMenuItem, "Qual é a função do botão 'Atualizar'"))
 Else If(InStr(A_ThisMenuItem, "Qual é a função do menu 'Editar'"))
    ; msgbox SUCESSO com SOM e ICONE alwaysontop
    MsgBox, 4160 , INFORMAÇÃO!, Dentro do menu 'Editar'`, você encontra a opção para definir e editar as configurações das requisições HTTP GET e POST.`n`nObservação: faça alterações apenas se estiver familiarizado com o processo`, pois trata-se de uma configuração ""avançada"""., 900
-
+Else If(InStr(A_ThisMenuItem, "Desmarcar Todos Sites"))
+{
+      WinGet, ActiveControlList, ControlList, A
+   ; FileAppend, Ctrl #`tClasNN`tData`n, C:\Controls.txt
+   ; os checkboxes começam a partir do nome "Button6"
+   number:=6
+   Loop, Parse, ActiveControlList, `n
+   {
+      ; ControlGetText, theText, %A_LoopField%
+      ; FileAppend, %a_index%`t%A_LoopField%`t%theText%`n, C:\Controls.txt
+      if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
+      {
+                     ; DAR FOCO NO CONTROL
+                     GuiControl, Focus, %A_LoopField%
+                     ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                     GuiControlGet,varName, FocusV
+                     ; msgbox % varName
+                     GuiControl,, %varName%, 0
+      }
+   }
+}
+Else If(InStr(A_ThisMenuItem, "Marcar Todos Sites"))
+{
+   WinGet, ActiveControlList, ControlList, A
+   ; FileAppend, Ctrl #`tClasNN`tData`n, C:\Controls.txt
+   ; os checkboxes começam a partir do nome "Button6"
+   number:=6
+   Loop, Parse, ActiveControlList, `n
+   {
+      ; ControlGetText, theText, %A_LoopField%
+      ; FileAppend, %a_index%`t%A_LoopField%`t%theText%`n, C:\Controls.txt
+      if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
+      {
+                     ; DAR FOCO NO CONTROL
+                     GuiControl, Focus, %A_LoopField%
+                     ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                     GuiControlGet,varName, FocusV
+                     ; msgbox % varName
+                     GuiControl,, %varName%, 1
+      }
+   }
+}
+Else If(InStr(A_ThisMenuItem, "Marcar Principais Sites"))
+{
+      WinGet, ActiveControlList, ControlList, A
+      ; FileAppend, Ctrl #`tClasNN`tData`n, C:\Controls.txt
+      ; os checkboxes começam a partir do nome "Button6"
+      number:=6
+   Loop, Parse, ActiveControlList, `n
+   {
+      ControlGetText, theText, %A_LoopField%
+      ; * desmarcar todos os checkboxes
+      if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
+         {
+                        ; DAR FOCO NO CONTROL
+                        GuiControl, Focus, %A_LoopField%
+                        ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                        GuiControlGet,varName, FocusV
+                        ; msgbox % varName
+                        GuiControl,, %varName%, 0
+         }
+         ; * marcar os principais checkboxes
+      if(RegexMatch(theText, "i)stackoverflow"))
+      {
+                     ; DAR FOCO NO CONTROL
+                     GuiControl, Focus, %A_LoopField%
+                     ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                     GuiControlGet,varName, FocusV
+                     ; msgbox % varName
+                     GuiControl,, %varName%, 1
+      }
+   }
+}
 Return
 
 MenuAjudaExemplos:
