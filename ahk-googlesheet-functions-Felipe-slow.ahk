@@ -63,6 +63,7 @@ Menu, FileMenu, Add ; with no more options, this is a seperator
 Menu, FileMenu, Add, &Abrir Planilha Analytics`tCtrl+1, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Planilha Database`tCtrl+2, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Planilha Programming`tCtrl+3, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha Programas`tCtrl+4, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Planilha All`tCtrl+4, MenuAbrirLink
 Menu, FileMenu, Add ; with no more options, this is a seperator
 Menu, FileMenu, Add, &Abrir Pasta Documentações Drive`tCtrl+5, MenuAbrirLink
@@ -149,6 +150,7 @@ Gui, Add, Checkbox, vCheckIdiomaPt Checked1 xs y+5 center, abrir documentação 
 */
 GoSub, ReadIniFile
 Gui, Show, AutoSize , Web Analytics Links Helper - Felipe Lullio
+; Gui, +Resize
 GuiControl, +Default, BtnPesquisar ; Definir o botão Pesquisar como Padrão
 ControlFocus, Edit1, Web Analytics Links ; Dar foco no input Edit de Pesquisa
 ; GoSub, ReadIniFile ; aqui mostra os dados sendo carregados na gui
@@ -997,6 +999,8 @@ checkSpreadsheetLink(PlanilhaLink){
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Banco de Dados")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ZmlzAhTGDPCsAz9yHAQGHEGPFdLDh1sCE6D7ePHNLjM/edit#gid=0"
+      else if(PlanilhaLink = "Documentações Programas")
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ttLOdD2Mz8yZrsLS5vGHW3ojnkeRUOd1YwhwQ5EGIRY/edit#gid=0"
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Programação")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1TkfWTjHWunj6A13X_cMydXX_UEant4sgMKfqr13mjiU/edit#gid=0"
@@ -1171,7 +1175,7 @@ MenuEditarBase:
   Gui, ConfigFile:Font, S10
   Gui, ConfigFile:Add, Text,center h20 +0x200, Alterar Link da Planilha:
   IniRead, PlanilhaLink, %iniPath%, planilha, linkPlanilha
-  Gui ConfigFile:Add, ComboBox, y+5 w415 center vPlanilhaLink hwndDimensoesID gValidarLink,Documentações Analytics|Documentações Banco de Dados|Documentações Programação|Documentações GAPS|Tudo|%PlanilhaLink%
+  Gui ConfigFile:Add, ComboBox, y+5 w415 center vPlanilhaLink hwndDimensoesID gValidarLink,Documentações Analytics|Documentações Banco de Dados|Documentações Programação|Documentações GAPS|Documentações Programas|Tudo|%PlanilhaLink%
 
   Gui, ConfigFile:Add, Text, center h20 +0x200, Nome/ID da aba da Planilha(Worksheet)
   Gui, ConfigFile:Add, Edit, w415 y+5 vPlanilhaNomeId
@@ -1373,6 +1377,8 @@ MenuAbrirLink:
       Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/1TkfWTjHWunj6A13X_cMydXX_UEant4sgMKfqr13mjiU/edit?usp=drive_link"
    Else If(InStr(A_ThisMenuItem, "Abrir Planilha All"))
       Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/10HK3v8M6T_qkCGktAvqgH1_nmDRudK2SF20R5UGEgP4/edit?usp=drive_link"
+   Else If(InStr(A_ThisMenuItem, "Abrir Planilha Programas"))
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/1ttLOdD2Mz8yZrsLS5vGHW3ojnkeRUOd1YwhwQ5EGIRY/edit#gid=0"
    Else If(InStr(A_ThisMenuItem, "Abrir Pasta Pixels"))
       Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1m9rlPqx710icPobioyCU4FrcswwVGsdI?usp=sharing"
    Else If(InStr(A_ThisMenuItem, "Abrir Pasta Documentações Drive"))
