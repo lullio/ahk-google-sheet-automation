@@ -1214,8 +1214,10 @@ Else If(InStr(A_ThisMenuItem, "Pesquisar no Google")) ; * GUI PARA PESQUISAR NO 
 {
 Gui, SearchInternet:New, +AlwaysOnTop -Resize -MinimizeBox -MaximizeBox, Pesquisar no Google
 Menu, MenuAjuda, Add, &Desmarcar Todos Sites`tCtrl+Shift+U, MenuAjudaNotify
-Menu, MenuAjuda, Add, &Marcar Principais Sites`tCtrl+Shift+C, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Marcar Todos Sites`tCtrl+Shift+A, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Marcar Principais Sites`tCtrl+Shift+M, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Marcar Analytics Sites`tCtrl+Shift+D, MenuAjudaNotify
+Menu, MenuAjuda, Add, &Marcar Linux Sites`tCtrl+Shift+L, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque um sinal de menos antes das palavras que você não deseja: -roedor, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque um sinal de mais antes das palavras que você deseja: +roedor, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque o wildcard * para representar qualquer coisa: top * ranking sp, MenuAjudaNotify
@@ -1263,23 +1265,29 @@ gui, SearchInternet:Add, Button, xs y+10 w175 h30 gSearch Default, &Pesquisar
 Gui, SearchInternet:Add, Button, x+10 w100 h30 gCancel Cancel, Cancelar
 Gui, Font, S9
 
-gui, SearchInternet:Add, Checkbox, x+10 checked1 vlanguage, Pesquisa pt-br. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
-gui, SearchInternet:Add, Checkbox, y+5 checked1 vquotes, Pesquisa Exata. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
+gui, SearchInternet:Add, Checkbox, x+10 checked0 vlanguage, Pesquisa pt-br. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
+gui, SearchInternet:Add, Checkbox, y+5 checked0 vquotes, Pesquisa Exata. ; Wrap Search in Double quotes ;Add check box to wrap in double quotes
 
 gui, SearchInternet:font, S10  ;Change font size to 12
 
 ; *1ª COLUNA DOS CHECKBOXES
 gui, SearchInternet:Add, Checkbox, xs y+20 checked1 vstack section, StackOverflow.com
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vstackBR, Pt.StackOverflow.com ;first checkbox and move down / over a bit
-gui, SearchInternet:Add, Checkbox, y+10 checked0 vstackAHK, StackOverflow.com/JS
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vahk, AutoHotkey.com
-; * 2ª COLUNA DOS CHECKBOXES
-Gui, SearchInternet:Add, Checkbox, ys x+40 Checked1 Vsuperuser section, Superuser.Com
-gui, SearchInternet:Add, Checkbox, y+10 checked1 vquora, Quora.Com
 gui, SearchInternet:Add, Checkbox, y+10 checked1 vstackex, StackExchange.Com
-gui, SearchInternet:Add, Checkbox, y+10 checked0 vgithub, Github.com
+Gui, SearchInternet:Add, Checkbox, y+10 Checked1 Vsuperuser, Superuser.Com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 vquora, Quora.Com
+; * 2ª COLUNA DOS CHECKBOXES
+gui, SearchInternet:Add, Checkbox, ys x+65 checked0 vanalyticsmania, Analyticsmania.com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vsimoahava, Simoahava.com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vmeasureschool, Measureschool.com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 voptimizesmart, Optimizesmart.com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vkristaseiden, Kristaseiden.com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vthyngster, thyngster.com
 ; * 3ª COLUNA DOS CHECKBOXES
-gui, SearchInternet:Add, Checkbox, ys x+80 Checked1 vReddit, Reddit.com
+gui, SearchInternet:Add, Checkbox, ys x+45 checked0 vlovesdata, Lovesdata.com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vgithub, Github.com
+gui, SearchInternet:Add, Checkbox, y+10 Checked1 vReddit, Reddit.com
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vubuntu, Askubuntu.Com
 gui, SearchInternet:Add, Checkbox, y+10 checked1 vgeneral, General
 
@@ -1289,7 +1297,7 @@ return
 Search:
 Gui, Submit, NoHide ;Needed to pull inf0 from controls
 ; msgbox % SearchTerm
-If(StrLen(SearchTerm) < 5)
+If(StrLen(SearchTerm) < 3)
 {
       MsgBox, 4112 , Ocorreu um ERRO, A pesquisa não atingiu o mínimo de caracteres necessário! Tente novamente!, 5
       GuiControl,SearchInternet:Focus,SearchTerm
@@ -1334,8 +1342,8 @@ If(StrLen(SearchTerm) < 5)
    Else If(InStr(SearchTermFileType, "Qualquer"))
       SearchTerm := SearchTerm "&as_filetype="
 
-   if (stackBR=0 AND stackAHK=0 AND ahk=0 AND Reddit=0 AND tech=0)
-      run "http://www.google.com/search?q=%SearchTerm%"
+   ; if (stackBR=0 AND stackAHK=0 AND ahk=0 AND Reddit=0 AND tech=0)
+   ;    run "http://www.google.com/search?q=%SearchTerm%"
    If stackBR
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=pt.stackoverflow.com"
    If stack
@@ -1350,6 +1358,20 @@ If(StrLen(SearchTerm) < 5)
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=stackexchange.com"
    If quora
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=quora.com"
+   If analyticsmania
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=analyticsmania.com"
+   If simoahava
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=simoahava.com"
+   If measureschool
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=measureschool.com"
+   If optimizesmart
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=optimizesmart.com"
+   If kristaseiden
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=kristaseiden.com"
+   If thyngster
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=thyngster.com"
+   If lovesdata
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=lovesdata.com"
    ; If estaclex
    ; run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=english.stackexchange.com"
    If ubuntu
@@ -1483,16 +1505,78 @@ Else If(InStr(A_ThisMenuItem, "Marcar Principais Sites"))
       ControlGetText, theText, %A_LoopField%
       ; * desmarcar todos os checkboxes
       if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
-         {
+      {
                         ; DAR FOCO NO CONTROL
                         GuiControl, Focus, %A_LoopField%
                         ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
                         GuiControlGet,varName, FocusV
                         ; msgbox % varName
                         GuiControl,, %varName%, 0
-         }
+      }
          ; * marcar os principais checkboxes
-      if(RegexMatch(theText, "i)stackoverflow"))
+      if(RegexMatch(theText, "i)(stack|reddit|general)"))
+      {
+                     ; DAR FOCO NO CONTROL
+                     GuiControl, Focus, %A_LoopField%
+                     ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                     GuiControlGet,varName, FocusV
+                     ; msgbox % varName
+                     GuiControl,, %varName%, 1
+      }
+   }
+}
+Else If(InStr(A_ThisMenuItem, "Marcar Analytics Sites"))
+{
+      WinGet, ActiveControlList, ControlList, A
+      ; FileAppend, Ctrl #`tClasNN`tData`n, C:\Controls.txt
+      ; os checkboxes começam a partir do nome "Button6"
+      number:=6
+   Loop, Parse, ActiveControlList, `n
+   {
+      ControlGetText, theText, %A_LoopField%
+      ; * desmarcar todos os checkboxes
+      if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
+      {
+                        ; DAR FOCO NO CONTROL
+                        GuiControl, Focus, %A_LoopField%
+                        ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                        GuiControlGet,varName, FocusV
+                        ; msgbox % varName
+                        GuiControl,, %varName%, 0
+      }
+         ; * marcar os principais checkboxes
+      if(RegexMatch(theText, "i)(analytics|simoahava|measure|optimize|krista|thyngster|data)"))
+      {
+                     ; DAR FOCO NO CONTROL
+                     GuiControl, Focus, %A_LoopField%
+                     ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                     GuiControlGet,varName, FocusV
+                     ; msgbox % varName
+                     GuiControl,, %varName%, 1
+      }
+   }
+}
+Else If(InStr(A_ThisMenuItem, "Marcar Linux Sites"))
+{
+      WinGet, ActiveControlList, ControlList, A
+      ; FileAppend, Ctrl #`tClasNN`tData`n, C:\Controls.txt
+      ; os checkboxes começam a partir do nome "Button6"
+      number:=6
+   Loop, Parse, ActiveControlList, `n
+   {
+      ControlGetText, theText, %A_LoopField%
+      ; * desmarcar todos os checkboxes
+      if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
+      {
+                        ; DAR FOCO NO CONTROL
+                        GuiControl, Focus, %A_LoopField%
+                        ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
+                        GuiControlGet,varName, FocusV
+                        ; msgbox % varName
+                        GuiControl,, %varName%, 0
+      }
+         ; * marcar os principais checkboxes
+      if(RegexMatch(theText, "i)(askubuntu|superuser|reddit|stack)"))
       {
                      ; DAR FOCO NO CONTROL
                      GuiControl, Focus, %A_LoopField%
