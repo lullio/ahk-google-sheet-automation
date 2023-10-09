@@ -1358,20 +1358,20 @@ If(StrLen(SearchTerm) < 3)
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=stackexchange.com"
    If quora
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=quora.com"
-   If analyticsmania
-      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=analyticsmania.com"
-   If simoahava
-      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=simoahava.com"
+   If kristaseiden
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=kristaseiden.com"
+   If lovesdata
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=lovesdata.com"
+   If thyngster
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=thyngster.com"
    If measureschool
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=measureschool.com"
    If optimizesmart
       run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=optimizesmart.com"
-   If kristaseiden
-      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=kristaseiden.com"
-   If thyngster
-      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=thyngster.com"
-   If lovesdata
-      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=lovesdata.com"
+   If simoahava
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=simoahava.com"
+   If analyticsmania
+      run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=analyticsmania.com"
    ; If estaclex
    ; run "http://www.google.com/search?q=%SearchTerm%&as_sitesearch=english.stackexchange.com"
    If ubuntu
@@ -1472,6 +1472,7 @@ Else If(InStr(A_ThisMenuItem, "Desmarcar Todos Sites"))
                      GuiControl,, %varName%, 0
       }
    }
+   GuiControl,SearchInternet:Focus,SearchTerm
 }
 Else If(InStr(A_ThisMenuItem, "Marcar Todos Sites"))
 {
@@ -1493,6 +1494,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Todos Sites"))
                      GuiControl,, %varName%, 1
       }
    }
+   GuiControl,SearchInternet:Focus,SearchTerm
 }
 Else If(InStr(A_ThisMenuItem, "Marcar Principais Sites"))
 {
@@ -1524,6 +1526,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Principais Sites"))
                      GuiControl,, %varName%, 1
       }
    }
+   GuiControl,SearchInternet:Focus,SearchTerm
 }
 Else If(InStr(A_ThisMenuItem, "Marcar Analytics Sites"))
 {
@@ -1555,6 +1558,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Analytics Sites"))
                      GuiControl,, %varName%, 1
       }
    }
+   GuiControl,SearchInternet:Focus,SearchTerm
 }
 Else If(InStr(A_ThisMenuItem, "Marcar Linux Sites"))
 {
@@ -1586,6 +1590,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Linux Sites"))
                      GuiControl,, %varName%, 1
       }
    }
+   GuiControl,SearchInternet:Focus,SearchTerm
 }
 Return
 
