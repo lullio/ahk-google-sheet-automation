@@ -1412,14 +1412,12 @@ MenuAbrirLink:
    Else If(InStr(A_ThisMenuItem, "Pasta Script"))
       Run, %A_ScriptDir%
 
-   If(InStr(A_ThisMenuItem, "cursos udemy"))
-      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://www.udemy.com/home/my-courses/lists/"
-   Else If(InStr(A_ThisMenuItem, "Desenvolvedor"))
+   If(InStr(A_ThisMenuItem, "Desenvolvedor"))
       Run, https://lullio.com.br
    Else If(InStr(A_ThisMenuItem, "Sobre o programa"))
    {
       Run, https://projetos.lullio.com.br/control-video-study
-      Run, https://github.com/lullio/ahk-getData-googleSheet
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://github.com/lullio/ahk-getData-googleSheet"
    }
    Else If(InStr(A_ThisMenuItem, "WhatsApp"))
       Run, https://wa.me/5511991486309
