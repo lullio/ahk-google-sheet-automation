@@ -97,7 +97,7 @@ Menu, HelpMenu, Add, &Desenvolvedor, MenuAbrirLink
 Menu, HelpMenu, Add, &WhatsApp, MenuAbrirLink
 
 ; Attach the sub-menus that were created above.
-Menu, MyMenuBar, Add, &Arquivo, :FileMenu
+Menu, MyMenuBar, Add, &Abrir, :FileMenu
 ; Menu, MyMenuBar, Add, &Editar, :EditMenu
 ; Menu, MyMenuBar, Add, &Editar, :EditMenu
 Menu, MyMenuBar, Add, &Editar, :EditMenu
