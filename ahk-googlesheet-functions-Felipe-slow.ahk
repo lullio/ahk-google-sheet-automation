@@ -582,8 +582,11 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
       code := whr.ResponseText
       ; MsgBox % code
       Clipboard := code
-      MsgBox, 4160 , SUCESSO!, Código copiado para a área de transferência, 2
+      ; * Abrir URL de edição do GIST profile default do chrome
+      gistEditUrl :=  RegExReplace(URLCode, "/raw/.*", "/edit") ; abrir modo de edição do raw
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "%gistEditUrl%"
 
+      MsgBox, 4160 , SUCESSO!, Código copiado para a área de transferência, 2
       ; * EXIBIR CODIGO NA TELA, FUNÇÕES ESTÃO NO FINAL DO ARQUIVO
       ; displayNum := 0
       ; visibleState := true
