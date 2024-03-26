@@ -63,8 +63,9 @@ Menu, FileMenu, Add ; with no more options, this is a seperator
 Menu, FileMenu, Add, &Abrir Planilha Analytics`tCtrl+1, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Planilha Database`tCtrl+2, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Planilha Programming`tCtrl+3, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Planilha Programas`tCtrl+4, MenuAbrirLink
-Menu, FileMenu, Add, &Abrir Planilha All`tCtrl+4, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha Work`tCtrl+4, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha Programas`tCtrl+5, MenuAbrirLink
+Menu, FileMenu, Add, &Abrir Planilha All`tCtrl+6, MenuAbrirLink
 Menu, FileMenu, Add ; with no more options, this is a seperator
 Menu, FileMenu, Add, &Abrir Pasta Documentações Drive`tCtrl+5, MenuAbrirLink
 Menu, FileMenu, Add, &Abrir Pasta Documentações Template Drive`tCtrl+6, MenuAbrirLink
@@ -425,11 +426,17 @@ GS_GetCSV_ToListView(PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, Planil
        {
           LineNumber := A_Index ; Index da linha
           LineContent := A_LoopField ; Conteúdo da linha, todos valores da linha, a 1ª linha vai ser o HEADER(vc consegue capturar os headers das colunas)
+         ;  msgbox % LineNumber
+         ;  msgbox % LineContent
+         ;  if(InStr(LineContent, "`n"))
+            ; msgbox % LineContent
+
        Loop, parse, A_LoopField, `, ; PROCESSAR CADA CÉLULA/CAMPO DA LINHA ATUAL
        {
          ColumnNumber := A_Index ; Index da coluna
          cellContent := A_LoopField ; armazenar o conteúdo da célula numa variável
-          ; msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
+         ; msgbox % ColumnNumber
+         ;  msgbox %A_LoopField% ; Exibe cada célula, cada camnpo da planilha
           ; msgbox % SubStr(A_LoopField, 2,-1) ; remove o primeiro e último catactere (as aspas)
        } ; FIM DO LOOP DA COLUNA
          totalColunas := ColumnNumber
@@ -550,6 +557,10 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
                RunAs
                WinActivate, Notion
             }
+            Else If(InStr(URL, "https://tagmanager.google.com"))
+               {
+                  Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "%URL%"
+               }
             Else
               Run, %URL%
          }
@@ -559,19 +570,20 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
    getColumnCode := GS_GetCSV_Column(, "i).*(code|codigo|código|source-code|source).*", PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao, PlanilhaRange, PlanilhaNomeId)
    ; msgbox % getColumnName.arrColumn[2]
 
-   posicaoColunaCode := getColumnCode.ColumnPosition
-   valueColunaCode := getColumnCode.ColumnName
+   posicaoColunaCode := getColumnCode.ColumnPosition ; 5
+   valueColunaCode := getColumnCode.ColumnName ; CODE
+
     ; URLCode := getColumnCode.arrColumnSanitize[NumeroLinhaSelecionada+1]
     ; * CAPTURAR VALOR DA COLUNA "URL"
-    LV_GetText(URLCode, NumeroLinhaSelecionada, posicaoColunaCode)
-
+   LV_GetText(URLCode, NumeroLinhaSelecionada, posicaoColunaCode) ; ""
+   LV_GetText(IndexLinhaSelecionada, NumeroLinhaSelecionada, 1) ; ""
     ; * SOLUÇÃO PARA NÃO DEPENDER DA COLUNA URL QUE ESTÁ NA GUI, PEGAR DIRETO DA PLANILHA(array que foi salvo)
     If(!URLCode)
-      URLCode := getColumnCode.arrColumnSanitize[NumeroLinhaSelecionada+1]
+      URLCode := getColumnCode.arrColumnSanitize[IndexLinhaSelecionada]
    ; msgbox % TextoLVURL
    ; msgbox % getColumnURL.arrColumnSanitize[NumeroLinhaSelecionada+1]
    ; msgbox %URLCode%
-   If(URLCode)
+   If(InStr(URLCode, "pastebin") || InStr(URLCode, "gist"))
    {
       ; UrlDownloadToFile, %URLCode%, arquivo.txt
       whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
@@ -583,17 +595,21 @@ GS_GetListView_Click(idioma, PlanilhaLink, PlanilhaQuery, PlanilhaTipoExportacao
       ; MsgBox % code
       Clipboard := code
       ; * Abrir URL de edição do GIST profile default do chrome
-      gistEditUrl :=  RegExReplace(URLCode, "/raw/.*", "/edit") ; abrir modo de edição do raw
-      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "%gistEditUrl%"
+      ; gistEditUrl :=  RegExReplace(URLCode, "/raw/.*", "/edit") ; abrir modo de edição do raw
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "%URLCode%"
 
       MsgBox, 4160 , SUCESSO!, Código copiado para a área de transferência, 2
       ; * EXIBIR CODIGO NA TELA, FUNÇÕES ESTÃO NO FINAL DO ARQUIVO
       ; displayNum := 0
       ; visibleState := true
       pasteToScreen()
-   }Else{
+   }Else If(URLCode == "" || URLCode == "CODE" || URLCode == " "){
+      ; msgbox % URLCode
       Notify().AddWindow("Não existe nenhum código para o campo selecionado!!",{Time:2000,Icon:177,Background:"0x039018",Title:"INFO!",TitleSize:15, Size:14, Color: "0xFFFF", TitleColor: "0xE1B9A4"},,"setPosBR")
 
+   }Else{
+      Clipboard := StrReplace(URLCode, "\n", "`n")
+      pasteToScreen()
    }
       ; /*
       ;    ABRIR NOTION
@@ -1004,6 +1020,8 @@ checkSpreadsheetLink(PlanilhaLink){
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ZmlzAhTGDPCsAz9yHAQGHEGPFdLDh1sCE6D7ePHNLjM/edit#gid=0"
       else if(PlanilhaLink = "Documentações Programas")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1ttLOdD2Mz8yZrsLS5vGHW3ojnkeRUOd1YwhwQ5EGIRY/edit#gid=0"
+      else if(PlanilhaLink = "Documentações Work")
+         Return linkPlanilha := "https://docs.google.com/spreadsheets/d/18cMG-GKYTR7MjKw4NQOGu4El-8n62qncCwyWVIktrTg/edit#gid=0"
       ; TEMPLATE 2
       else if(PlanilhaLink = "Documentações Programação")
          Return linkPlanilha := "https://docs.google.com/spreadsheets/d/1TkfWTjHWunj6A13X_cMydXX_UEant4sgMKfqr13mjiU/edit#gid=0"
@@ -1178,7 +1196,7 @@ MenuEditarBase:
   Gui, ConfigFile:Font, S10
   Gui, ConfigFile:Add, Text,center h20 +0x200, Alterar Link da Planilha:
   IniRead, PlanilhaLink, %iniPath%, planilha, linkPlanilha
-  Gui ConfigFile:Add, ComboBox, y+5 w415 center vPlanilhaLink hwndDimensoesID gValidarLink,Documentações Analytics|Documentações Banco de Dados|Documentações Programação|Documentações GAPS|Documentações Programas|Tudo|%PlanilhaLink%
+  Gui ConfigFile:Add, ComboBox, y+5 w415 center vPlanilhaLink hwndDimensoesID gValidarLink,Documentações Analytics|Documentações Banco de Dados|Documentações Programação|Documentações GAPS|Documentações Programas|Documentações Work|Tudo|%PlanilhaLink%
 
   Gui, ConfigFile:Add, Text, center h20 +0x200, Nome/ID da aba da Planilha(Worksheet)
   Gui, ConfigFile:Add, Edit, w415 y+5 vPlanilhaNomeId
@@ -1274,25 +1292,25 @@ gui, SearchInternet:Add, Checkbox, y+5 checked0 vquotes, Pesquisa Exata. ; Wrap 
 gui, SearchInternet:font, S10  ;Change font size to 12
 
 ; *1ª COLUNA DOS CHECKBOXES
-gui, SearchInternet:Add, Checkbox, xs y+20 checked1 vstack section, StackOverflow.com
+gui, SearchInternet:Add, Checkbox, xs y+20 checked0 vstack section, StackOverflow.com
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vstackBR, Pt.StackOverflow.com ;first checkbox and move down / over a bit
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vahk, AutoHotkey.com
-gui, SearchInternet:Add, Checkbox, y+10 checked1 vstackex, StackExchange.Com
-Gui, SearchInternet:Add, Checkbox, y+10 Checked1 Vsuperuser, Superuser.Com
-gui, SearchInternet:Add, Checkbox, y+10 checked1 vquora, Quora.Com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vstackex, StackExchange.Com
+Gui, SearchInternet:Add, Checkbox, y+10 Checked0 Vsuperuser, Superuser.Com
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vquora, Quora.Com
 ; * 2ª COLUNA DOS CHECKBOXES
-gui, SearchInternet:Add, Checkbox, ys x+65 checked0 vanalyticsmania, Analyticsmania.com
-gui, SearchInternet:Add, Checkbox, y+10 checked0 vsimoahava, Simoahava.com
-gui, SearchInternet:Add, Checkbox, y+10 checked0 vmeasureschool, Measureschool.com
-gui, SearchInternet:Add, Checkbox, y+10 checked0 voptimizesmart, Optimizesmart.com
-gui, SearchInternet:Add, Checkbox, y+10 checked0 vkristaseiden, Kristaseiden.com
-gui, SearchInternet:Add, Checkbox, y+10 checked0 vthyngster, thyngster.com
+gui, SearchInternet:Add, Checkbox, ys x+65 checked1 vanalyticsmania, Analyticsmania.com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 vsimoahava, Simoahava.com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 vmeasureschool, Measureschool.com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 voptimizesmart, Optimizesmart.com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 vkristaseiden, Kristaseiden.com
+gui, SearchInternet:Add, Checkbox, y+10 checked1 vthyngster, thyngster.com
 ; * 3ª COLUNA DOS CHECKBOXES
-gui, SearchInternet:Add, Checkbox, ys x+45 checked0 vlovesdata, Lovesdata.com
+gui, SearchInternet:Add, Checkbox, ys x+45 checked1 vlovesdata, Lovesdata.com
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vgithub, Github.com
 gui, SearchInternet:Add, Checkbox, y+10 Checked1 vReddit, Reddit.com
 gui, SearchInternet:Add, Checkbox, y+10 checked0 vubuntu, Askubuntu.Com
-gui, SearchInternet:Add, Checkbox, y+10 checked1 vgeneral, General
+gui, SearchInternet:Add, Checkbox, y+10 checked0 vgeneral, General
 
 gui, SearchInternet:Show
 GuiControl,SearchInternet:Focus,SearchTerm
@@ -1404,6 +1422,8 @@ MenuAbrirLink:
       Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/10HK3v8M6T_qkCGktAvqgH1_nmDRudK2SF20R5UGEgP4/edit?usp=drive_link"
    Else If(InStr(A_ThisMenuItem, "Abrir Planilha Programas"))
       Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/1ttLOdD2Mz8yZrsLS5vGHW3ojnkeRUOd1YwhwQ5EGIRY/edit#gid=0"
+   Else If(InStr(A_ThisMenuItem, "Abrir Planilha Work"))
+      Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://docs.google.com/spreadsheets/d/18cMG-GKYTR7MjKw4NQOGu4El-8n62qncCwyWVIktrTg/edit?usp=sharing"
    Else If(InStr(A_ThisMenuItem, "Abrir Pasta Pixels"))
       Run, "C:\Program Files\Google\Chrome\Application\chrome.exe" --profile-directory="Default" "https://drive.google.com/drive/folders/1m9rlPqx710icPobioyCU4FrcswwVGsdI?usp=sharing"
    Else If(InStr(A_ThisMenuItem, "Abrir Pasta Documentações Drive"))
@@ -1431,7 +1451,7 @@ If(InStr(A_ThisMenuItem, "filtrar dados"))
    MsgBox, 4160 , INFORMAÇÃO!, O campo "Filtrar Dados" destina-se a filtrar os dados da consulta ao banco de dados. `n`nEsse filtro tem a finalidade de excluir tarefas que foram arquivadas.`n`nObs: Existem duas checkboxes`, uma na tela principal e outra na tela de configurações do get request`, as duas são verificadas., 900
 Else If(InStr(A_ThisMenuItem, "como usar o programa"))
    ; msgbox SUCESSO com SOM e ICONE alwaysontop
-   MsgBox, 4160 , INFORMAÇÃO!, 1. Use o campo de pesquisa para buscar uma documentação`, o campo aceita expressões regulares(Regex)`n`n2. Dê um duplo clique em um item da lista para abrir a documentação correspondente. Pode ser que abra mais de um link.`n`n3. Dê de um duplo clique com o botão direito para copiar o código da documentação(se existir) para a área de transferência. Uma imagem do código também será exibida na tela`n`n4. Desmarque o checkbox "abrir documentação em português" caso queira abrir as documentações Google em inglês, 900
+   MsgBox, 4160 , INFORMAÇÃO!, 1. Use o campo de pesquisa para buscar uma documentação`, o campo aceita expressões regulares(Regex)`n`n2. Dê um duplo clique em um item da lista para abrir a documentação correspondente. Pode ser que abra mais de um link.`n`n3. Dê de um duplo clique com o botão direito para copiar o código(se existir) para a área de transferência. Uma imagem do código também será exibida na tela.`nVocê pode colocar qualquer texto na coluna 'CODE' da planilha ou um link que contém o código.`n`n4. Desmarque o checkbox "abrir documentação em português" caso queira abrir as documentações Google em inglês, 900
 Else If(InStr(A_ThisMenuItem, "Qual é a função do botão 'Enviar'"))
    ; msgbox SUCESSO com SOM e ICONE alwaysontop
    MsgBox, 4160 , INFORMAÇÃO!, O botão 'Enviar' tem a finalidade de cadastrar uma tarefa no banco de dados do Notion.`n`nVocê pode configurar e modificar qual banco de dados deseja utilizar nas opções do menu 'Editar' (CTRL+E)., 900
@@ -1516,7 +1536,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Principais Sites"))
                         ; msgbox % varName
                         GuiControl,, %varName%, 0
       }
-         ; * marcar os principais checkboxes
+      ; * marcar os principais checkboxes
       if(RegexMatch(theText, "i)(stack|reddit|general)"))
       {
                      ; DAR FOCO NO CONTROL
@@ -1548,7 +1568,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Analytics Sites"))
                         ; msgbox % varName
                         GuiControl,, %varName%, 0
       }
-         ; * marcar os principais checkboxes
+      ; * marcar os principais checkboxes
       if(RegexMatch(theText, "i)(analytics|simoahava|measure|optimize|krista|thyngster|data)"))
       {
                      ; DAR FOCO NO CONTROL
@@ -1580,7 +1600,7 @@ Else If(InStr(A_ThisMenuItem, "Marcar Linux Sites"))
                         ; msgbox % varName
                         GuiControl,, %varName%, 0
       }
-         ; * marcar os principais checkboxes
+      ; * marcar os principais checkboxes
       if(RegexMatch(theText, "i)(askubuntu|superuser|reddit|stack)"))
       {
                      ; DAR FOCO NO CONTROL

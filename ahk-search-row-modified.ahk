@@ -1,5 +1,6 @@
+#SingleInstance, Force
 settimer, fetch, -50
-doc := "1GB5rHO87c-1uGmvF5KTLrRtI1PX2WMdNS93fSdRpy34"
+doc := "15PHCe8pYJjkJt0oQRn6b64lQYVpfziEKCNktPm-OzBI"
 sht := "0"
 lst := ""
 InputBox, needle,search, , , 175, 105
@@ -7,7 +8,7 @@ ifequal, needle, , exitapp
 
 row := []
 gui, margin,0,0
-gui,add, listview, x1 y1 w800 h100 vmylv grid,ID|Nome|URL|Categoria
+gui,add, listview, x1 y1 w800 h100 vmylv grid, id_atendimento|id_paciente|id_profissional|nome_especialidade|modo_atendimento|objetivo_atendimento|tempo_total_chamada_minutos|sexo_paciente|uf_paciente|idade|nps_medico
 for x,y in strsplit(oVar,"`n","`r")
 	{
 		msgbox %x% ; Index of row
@@ -24,6 +25,7 @@ for x,y in strsplit(oVar,"`n","`r")
 		}
 	}
 LV_ModifyCol()
+
 gui, show
 return
 
