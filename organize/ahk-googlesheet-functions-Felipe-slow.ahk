@@ -1236,14 +1236,9 @@ Else If(InStr(A_ThisMenuItem, "Pesquisar no Google")) ; * GUI PARA PESQUISAR NO 
 Gui, SearchInternet:New, +AlwaysOnTop -Resize -MinimizeBox -MaximizeBox, Pesquisar no Google
 Menu, MenuAjuda, Add, &Desmarcar Todos Sites`tCtrl+Shift+U, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Marcar Todos Sites`tCtrl+Shift+A, MenuAjudaNotify
-
-Menu, MenuAjuda, Add ; with no more options, this is a seperator
 Menu, MenuAjuda, Add, &Marcar Principais Sites`tCtrl+Shift+M, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Marcar Analytics Sites`tCtrl+Shift+D, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Marcar Linux Sites`tCtrl+Shift+L, MenuAjudaNotify
-Menu, MenuAjuda, Add, &Marcar Autohotkey`tCtrl+Shift+H, MenuAjudaNotify
-
-Menu, MenuAjuda, Add ; with no more options, this is a seperator
 Menu, MenuAjuda, Add, &Coloque um sinal de menos antes das palavras que você não deseja: -roedor, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque um sinal de mais antes das palavras que você deseja: +roedor, MenuAjudaNotify
 Menu, MenuAjuda, Add, &Coloque o wildcard * para representar qualquer coisa: top * ranking sp, MenuAjudaNotify
@@ -1607,38 +1602,6 @@ Else If(InStr(A_ThisMenuItem, "Marcar Linux Sites"))
       }
       ; * marcar os principais checkboxes
       if(RegexMatch(theText, "i)(askubuntu|superuser|reddit|stack)"))
-      {
-                     ; DAR FOCO NO CONTROL
-                     GuiControl, Focus, %A_LoopField%
-                     ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
-                     GuiControlGet,varName, FocusV
-                     ; msgbox % varName
-                     GuiControl,, %varName%, 1
-      }
-   }
-   GuiControl,SearchInternet:Focus,SearchTerm
-}
-Else If(InStr(A_ThisMenuItem, "Marcar Autohotkey"))
-{
-      WinGet, ActiveControlList, ControlList, A
-      ; FileAppend, Ctrl #`tClasNN`tData`n, C:\Controls.txt
-      ; os checkboxes começam a partir do nome "Button6"
-      number:=6
-   Loop, Parse, ActiveControlList, `n
-   {
-      ControlGetText, theText, %A_LoopField%
-      ; * desmarcar todos os checkboxes
-      if(RegexMatch(A_LoopField, "(^Button[6789])|^Button[123][0123456789]"))
-      {
-                        ; DAR FOCO NO CONTROL
-                        GuiControl, Focus, %A_LoopField%
-                        ; RETORNAR O NOME/VARIÁVEL DO CONTROL QUE ESTÁ COM FOCO
-                        GuiControlGet,varName, FocusV
-                        ; msgbox % varName
-                        GuiControl,, %varName%, 0
-      }
-      ; * marcar os principais checkboxes
-      if(RegexMatch(theText, "i)(AutoHotkey.*)"))
       {
                      ; DAR FOCO NO CONTROL
                      GuiControl, Focus, %A_LoopField%
